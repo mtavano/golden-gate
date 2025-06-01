@@ -6,6 +6,7 @@ import (
 	"strings"
 	"unicode/utf8"
 	"github.com/mtavano/golden-gate/internal/models"
+	"strconv"
 )
 
 templ Dashboard(requests []*models.RequestLog) {
@@ -33,7 +34,7 @@ templ Dashboard(requests []*models.RequestLog) {
 								}
 								<button class="ml-4 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600" onclick="copyToClipboard('curl-{i}')">Copy as curl</button>
 							</div>
-							<div class="hidden" id={"curl-" + i}>{ buildCurlCommand(req) }</div>
+							<div class="hidden" id={"curl-" + strconv.Itoa(i)}>{ buildCurlCommand(req) }</div>
 							<div class="text-sm text-gray-600">
 								<div>Timestamp: { req.Timestamp.Format("2006-01-02 15:04:05") }</div>
 								if len(req.Query) > 0 {
