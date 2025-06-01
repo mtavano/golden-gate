@@ -1,10 +1,10 @@
 {
   "api_1_name": {
-    "base_prefix": "/cloud",
-    "target": "http://cloud.mtavano.cc"
+    "base_prefix": "/buda",
+    "target": "https://www.buda.com/api/v2"
   },
   "api_2_name": {
-    "base_prefix": "/api/v2",
+    "base_prefix": "/cloud",
     "target": "http://api.example.com/v2"
   }
-} 
+}
