@@ -5,6 +5,6 @@
   },
   "api_2_name": {
     "base_prefix": "/cloud",
-    "target": "http://api.example.com/v2"
+    "target": "http://cloud.mtavano.cc"
   }
 }
