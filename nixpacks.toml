@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ['go']
+
+[phases.install]
+cmds = ['go mod download']
+
+[phases.build]
+cmds = ['go build -o golden-gate ./cmd/main']
+
+[start]
+cmd = './golden-gate' 
