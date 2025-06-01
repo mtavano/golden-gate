@@ -4,8 +4,15 @@ nixPkgs = ['go']
 [phases.install]
 cmds = ['go mod download']
 
+[phases.install]
+cmds = ['go mod download']
+
 [phases.build]
-cmds = ['go build -o golden-gate ./cmd/main']
+cmds = [
+  'go install github.com/a-h/templ/cmd/templ@latest',
+  '~/go/bin/templ generate ./internal/dashboard/views/',
+  'go build -o golden-gate ./cmd/main.go'
+]
 
 [start]
-cmd = './golden-gate' 
+cmd = './golden-gate'
