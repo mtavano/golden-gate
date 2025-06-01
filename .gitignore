@@ -1,0 +1,39 @@
+# Go
+/bin/
+/build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.log
+*.coverprofile
+*.mod
+*.sum
+vendor/
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Neovim
+*.tmp
+*.bak
+*.undo
+*.nvimlog
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.nfs* 
