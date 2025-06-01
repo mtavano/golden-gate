@@ -12,23 +12,23 @@ import (
 )
 
 func main() {
-	// Cargar configuración
+	// Load configuration
 	cfg, err := config.LoadConfig(config.GetConfigPath())
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	// Crear el store de requests
-	requestStore := models.NewRequestStore(100) // Mantener últimos 100 requests
+	// Create the request store
+	requestStore := models.NewRequestStore(100) // Keep the last 100 requests
 
-	// Crear el router
+	// Create the router
 	r := mux.NewRouter()
 
-	// Configurar el dashboard
+	// Set up the dashboard
 	dashboardHandler := dashboard.NewHandler(requestStore)
 	r.Handle("/dashboard", dashboardHandler)
 
-	// Configurar los proxies para cada servicio
+	// Set up proxies for each service
 	for _, serviceConfig := range cfg.Services {
 		proxyConfig := &proxy.Config{
 			BasePrefix: serviceConfig.BasePrefix,
@@ -38,7 +38,7 @@ func main() {
 		r.PathPrefix(serviceConfig.BasePrefix).Handler(proxyHandler)
 	}
 
-	// Iniciar el servidor
+	// Start the server
 	log.Printf("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatalf("Error starting server: %v", err)

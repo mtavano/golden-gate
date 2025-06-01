@@ -35,21 +35,21 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Crear el director del proxy
+	// Create the proxy director
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
-	// Modificar el director para capturar la respuesta y mantener la ruta
+	// Modify the director to capture the response and keep the path
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		req.Host = targetURL.Host
 		
-		// Obtener la ruta después del base_prefix
+		// Get the path after the base_prefix
 		path := strings.TrimPrefix(req.URL.Path, p.config.BasePrefix)
 		req.URL.Path = path
 	}
 
-	// Crear el log del request con la URL completa del target
+	// Create the request log with the full target URL
 	reqLog := &models.RequestLog{
 		ID:        r.Header.Get("X-Request-ID"),
 		Timestamp: time.Now(),
@@ -59,7 +59,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Query:     r.URL.Query(),
 	}
 
-	// Leer el body del request
+	// Read the request body
 	if r.Body != nil {
 		body, err := io.ReadAll(r.Body)
 		if err == nil {
@@ -68,7 +68,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Modificar el transport para capturar la respuesta
+	// Modify the transport to capture the response
 	proxy.Transport = &responseTransport{
 		originalTransport: http.DefaultTransport,
 		requestLog:        reqLog,
@@ -90,13 +90,13 @@ func (t *responseTransport) RoundTrip(req *http.Request) (*http.Response, error)
 		return nil, err
 	}
 
-	// Crear el log de la respuesta
+	// Create the response log
 	respLog := &models.ResponseLog{
 		StatusCode: resp.StatusCode,
 		Headers:    resp.Header,
 	}
 
-	// Leer el body de la respuesta
+	// Read the response body
 	if resp.Body != nil {
 		body, err := io.ReadAll(resp.Body)
 		if err == nil {
