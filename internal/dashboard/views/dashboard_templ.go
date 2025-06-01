@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"github.com/mtavano/golden-gate/internal/models"
 	"strings"
+	"unicode/utf8"
 )
 
 func Dashboard(requests []*models.RequestLog) templ.Component {
@@ -60,7 +61,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(req.Method)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 21, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 22, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -73,7 +74,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(req.URL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 21, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 22, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -91,7 +92,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(req.Response.StatusCode < 400)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 23, Col: 101}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 24, Col: 101}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -104,7 +105,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(req.Response.StatusCode >= 400)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 23, Col: 155}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 24, Col: 155}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -117,7 +118,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(req.Response.StatusCode)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 24, Col: 35}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 25, Col: 35}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -135,7 +136,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(req.Timestamp.Format("2006-01-02 15:04:05"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 30, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 31, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -153,7 +154,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(formatQueryParams(req.Query))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 34, Col: 76}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 35, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -172,7 +173,7 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(formatHeaders(req.Headers))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 40, Col: 74}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 41, Col: 74}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -189,9 +190,9 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var11 string
-					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(formatJSON(req.Body))
+					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(formatBodySmart(req.Body))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 46, Col: 68}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 47, Col: 73}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -208,9 +209,9 @@ func Dashboard(requests []*models.RequestLog) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var12 string
-					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formatJSON(req.Response.Body))
+					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formatBodySmart(req.Response.Body))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 52, Col: 77}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/dashboard.templ`, Line: 53, Col: 82}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -256,12 +257,18 @@ func formatHeaders(headers map[string][]string) string {
 	return result
 }
 
-func formatJSON(body []byte) string {
+func formatBodySmart(body []byte) string {
+	// Try to pretty-print as JSON
 	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, body, "", "  "); err != nil {
+	if err := json.Indent(&prettyJSON, body, "", "  "); err == nil {
+		return prettyJSON.String()
+	}
+	// If not JSON, check if it's valid UTF-8 (plain text)
+	if utf8.Valid(body) {
 		return string(body)
 	}
-	return prettyJSON.String()
+	// If not, show a message
+	return "[Non-printable or binary response]"
 }
 
 var _ = templruntime.GeneratedTemplate

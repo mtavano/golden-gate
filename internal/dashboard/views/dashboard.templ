@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"strings"
+	"unicode/utf8"
 	"github.com/mtavano/golden-gate/internal/models"
 )
 
@@ -43,13 +44,13 @@ templ Dashboard(requests []*models.RequestLog) {
 								if len(req.Body) > 0 {
 									<div class="mt-2">
 										<div class="font-medium">Request Body:</div>
-										<pre class="bg-gray-50 p-2 rounded">{ formatJSON(req.Body) }</pre>
+										<pre class="bg-gray-50 p-2 rounded">{ formatBodySmart(req.Body) }</pre>
 									</div>
 								}
 								if req.Response != nil {
 									<div class="mt-2">
 										<div class="font-medium">Response:</div>
-										<pre class="bg-gray-50 p-2 rounded">{ formatJSON(req.Response.Body) }</pre>
+										<pre class="bg-gray-50 p-2 rounded">{ formatBodySmart(req.Response.Body) }</pre>
 									</div>
 								}
 							</div>
@@ -77,10 +78,16 @@ func formatHeaders(headers map[string][]string) string {
 	return result
 }
 
-func formatJSON(body []byte) string {
+func formatBodySmart(body []byte) string {
+	// Try to pretty-print as JSON
 	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, body, "", "  "); err != nil {
+	if err := json.Indent(&prettyJSON, body, "", "  "); err == nil {
+		return prettyJSON.String()
+	}
+	// If not JSON, check if it's valid UTF-8 (plain text)
+	if utf8.Valid(body) {
 		return string(body)
 	}
-	return prettyJSON.String()
+	// If not, show a message
+	return "[Non-printable or binary response]"
 } 
