@@ -10,8 +10,6 @@
 *.out
 *.log
 *.coverprofile
-*.mod
-*.sum
 vendor/
 
 # Vim
