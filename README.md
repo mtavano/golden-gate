@@ -36,7 +36,7 @@ Edit the `configs/service.json` file to define the services to proxy:
 {
   "api_1_name": {
     "base_prefix": "/cloud",
-    "target": "http://cloud.mtavano.cc"
+    "target": "http://example.cc"
   }
 }
 ```
