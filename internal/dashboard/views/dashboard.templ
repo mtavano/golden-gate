@@ -10,13 +10,19 @@ import (
 
 templ Dashboard(requests []*models.RequestLog) {
 	@Layout("Golden Gate - Dashboard") {
+		<script>
+		function copyToClipboard(id) {
+			const el = document.getElementById(id);
+			navigator.clipboard.writeText(el.textContent);
+		}
+		</script>
 		<div class="space-y-8">
 			<h1 class="text-3xl font-bold text-gray-900">Golden Gate Dashboard</h1>
 			
 			<div class="bg-white shadow rounded-lg p-6">
 				<h2 class="text-xl font-semibold mb-4">Últimos Requests</h2>
 				<div class="space-y-4">
-					for _, req := range requests {
+					for i, req := range requests {
 						<div class="border rounded-lg p-4 space-y-2">
 							<div class="flex items-center justify-between">
 								<span class="font-medium">{ req.Method } { req.URL }</span>
@@ -25,8 +31,9 @@ templ Dashboard(requests []*models.RequestLog) {
 										{ req.Response.StatusCode }
 									</span>
 								}
+								<button class="ml-4 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600" onclick="copyToClipboard('curl-{i}')">Copy as curl</button>
 							</div>
-							
+							<div class="hidden" id={"curl-" + i}>{ buildCurlCommand(req) }</div>
 							<div class="text-sm text-gray-600">
 								<div>Timestamp: { req.Timestamp.Format("2006-01-02 15:04:05") }</div>
 								if len(req.Query) > 0 {
@@ -90,4 +97,21 @@ func formatBodySmart(body []byte) string {
 	}
 	// If not, show a message
 	return "[Non-printable or binary response]"
+}
+
+func buildCurlCommand(req *models.RequestLog) string {
+	cmd := []string{"curl", "-X", req.Method, "'" + req.URL + "'"}
+	for k, vs := range req.Headers {
+		for _, v := range vs {
+			cmd = append(cmd, "-H", "'"+k+": "+v+"'")
+		}
+	}
+	if len(req.Body) > 0 {
+		cmd = append(cmd, "--data-binary", "'"+escapeSingleQuotes(string(req.Body))+"'")
+	}
+	return strings.Join(cmd, " ")
+}
+
+func escapeSingleQuotes(s string) string {
+	return strings.ReplaceAll(s, "'", "'\\''")
 } 
