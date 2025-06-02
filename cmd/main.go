@@ -7,8 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mtavano/golden-gate/internal/config"
 	"github.com/mtavano/golden-gate/internal/dashboard"
-	"github.com/mtavano/golden-gate/internal/models"
 	"github.com/mtavano/golden-gate/internal/proxy"
+	"github.com/mtavano/golden-gate/internal/types"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Create the request store
-	requestStore := models.NewRequestStore(100) // Keep the last 100 requests
+	requestStore := types.NewRequestStore(100) // Keep the last 100 requests
 
 	// Create the router
 	r := mux.NewRouter()

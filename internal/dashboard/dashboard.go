@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/mtavano/golden-gate/internal/dashboard/views"
-	"github.com/mtavano/golden-gate/internal/models"
+	"github.com/mtavano/golden-gate/internal/types"
 )
 
 type Handler struct {
-	requestStore *models.RequestStore
+	requestStore *types.RequestStore
 }
 
-func NewHandler(requestStore *models.RequestStore) *Handler {
+func NewHandler(requestStore *types.RequestStore) *Handler {
 	return &Handler{
 		requestStore: requestStore,
 	}

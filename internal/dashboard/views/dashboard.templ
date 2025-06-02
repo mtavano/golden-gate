@@ -5,16 +5,24 @@ import (
 	"encoding/json"
 	"strings"
 	"unicode/utf8"
-	"github.com/mtavano/golden-gate/internal/models"
-	"strconv"
+	"github.com/mtavano/golden-gate/internal/types"
 )
 
-templ Dashboard(requests []*models.RequestLog) {
+templ Dashboard(requests []*types.RequestLog) {
 	@Layout("Golden Gate - Dashboard") {
 		<script>
 		function copyToClipboard(id) {
 			const el = document.getElementById(id);
 			navigator.clipboard.writeText(el.textContent);
+		}
+
+		function toggleVisibility(id) {
+			const el = document.getElementById(id);
+			if (el.style.display === "none") {
+				el.style.display = "block";
+			} else {
+				el.style.display = "none";
+			}
 		}
 		</script>
 		<div class="space-y-8">
@@ -22,45 +30,86 @@ templ Dashboard(requests []*models.RequestLog) {
 			
 			<div class="bg-white shadow rounded-lg p-6">
 				<h2 class="text-xl font-semibold mb-4">Últimos Requests</h2>
-				<div class="space-y-4">
-					for i, req := range requests {
-						<div class="border rounded-lg p-4 space-y-2">
-							<div class="flex items-center justify-between">
-								<span class="font-medium">{ req.Method } { req.URL }</span>
-								if req.Response != nil {
-									<span class="px-2 py-1 rounded text-sm" class:text-green-600={ req.Response.StatusCode < 400 } class:text-red-600={ req.Response.StatusCode >= 400 }>
-										{ req.Response.StatusCode }
-									</span>
-								}
-								<button class="ml-4 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600" onclick="copyToClipboard('curl-{i}')">Copy as curl</button>
+				<div class="space-y-6">
+					for _, req := range requests {
+						<div class="border rounded-lg p-6 space-y-4">
+							<div class="flex items-center justify-between border-b pb-4">
+								<div class="space-y-1">
+									<div class="flex items-center space-x-2">
+										<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">{ req.Method }</span>
+										<span class="font-mono text-gray-700">{ req.URL }</span>
+									</div>
+									<div class="text-sm text-gray-500">
+										{ req.Timestamp.Format("2006-01-02 15:04:05") }
+									</div>
+								</div>
 							</div>
-							<div class="hidden" id={"curl-" + strconv.Itoa(i)}>{ buildCurlCommand(req) }</div>
-							<div class="text-sm text-gray-600">
-								<div>Timestamp: { req.Timestamp.Format("2006-01-02 15:04:05") }</div>
-								if len(req.Query) > 0 {
-									<div class="mt-2">
-										<div class="font-medium">Query Params:</div>
-										<pre class="bg-gray-50 p-2 rounded">{ formatQueryParams(req.Query) }</pre>
-									</div>
-								}
-								if len(req.Headers) > 0 {
-									<div class="mt-2">
-										<div class="font-medium">Headers:</div>
-										<pre class="bg-gray-50 p-2 rounded">{ formatHeaders(req.Headers) }</pre>
-									</div>
-								}
-								if len(req.Body) > 0 {
-									<div class="mt-2">
-										<div class="font-medium">Request Body:</div>
-										<pre class="bg-gray-50 p-2 rounded">{ formatBodySmart(req.Body) }</pre>
-									</div>
-								}
+
+							<div class="grid grid-cols-2 gap-6">
+								<div class="space-y-4">
+									<h3 class="text-lg font-semibold text-gray-900">Request</h3>
+									
+									if len(req.Headers) > 0 {
+										<div class="space-y-2">
+											<h4 class="text-sm font-medium text-gray-700">Headers</h4>
+											<div class="bg-gray-50 rounded-lg p-3">
+												<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatHeaders(req.Headers) }</pre>
+											</div>
+										</div>
+									}
+
+									if len(req.Query) > 0 {
+										<div class="space-y-2">
+											<h4 class="text-sm font-medium text-gray-700">Query Parameters</h4>
+											<div class="bg-gray-50 rounded-lg p-3">
+												<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatQueryParams(req.Query) }</pre>
+											</div>
+										</div>
+									}
+
+									if len(req.Body) > 0 {
+										<div class="space-y-2">
+											<h4 class="text-sm font-medium text-gray-700">Body</h4>
+											<div class="bg-gray-50 rounded-lg p-3">
+												<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatBodySmart(req.Body) }</pre>
+											</div>
+										</div>
+									}
+								</div>
+
 								if req.Response != nil {
-									<div class="mt-2">
-										<div class="font-medium">Response:</div>
-										<pre class="bg-gray-50 p-2 rounded">{ formatBodySmart(req.Response.Body) }</pre>
+									<div class="space-y-4">
+										<h3 class="text-lg font-semibold text-gray-900">Response</h3>
+										
+										<div class="space-y-2">
+											<h4 class="text-sm font-medium text-gray-700">Status</h4>
+											<div class="flex items-center space-x-2">
+												<span class="px-2 py-1 rounded text-sm font-medium" class:text-green-600={ req.Response.StatusCode < 400 } class:text-red-600={ req.Response.StatusCode >= 400 }>
+													{ req.Response.StatusCode }
+												</span>
+											</div>
+										</div>
+
+										<button class="text-blue-500 hover:underline" onclick="toggleVisibility('response-body-{i}')">Toggle Response Body</button>
+										<div id="response-body-{i}" style="display: none;">
+											if len(req.Response.Body) > 0 {
+												<div class="space-y-2">
+													<h4 class="text-sm font-medium text-gray-700">Body</h4>
+													<div class="bg-gray-50 rounded-lg p-3">
+														<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatBodySmart(req.Response.Body) }</pre>
+													</div>
+												</div>
+											}
+										</div>
 									</div>
 								}
+							</div>
+
+							<button class="text-blue-500 hover:underline" onclick="toggleVisibility('curl-command-{i}')">Toggle Curl Command</button>
+							<div id="curl-command-{i}" style="display: none;">
+								<div class="bg-gray-50 rounded-lg p-3">
+									<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ buildCurlCommand(req) }</pre>
+								</div>
 							</div>
 						</div>
 					}
@@ -100,7 +149,7 @@ func formatBodySmart(body []byte) string {
 	return "[Non-printable or binary response]"
 }
 
-func buildCurlCommand(req *models.RequestLog) string {
+func buildCurlCommand(req *types.RequestLog) string {
 	cmd := []string{"curl", "-X", req.Method, "'" + req.URL + "'"}
 	for k, vs := range req.Headers {
 		for _, v := range vs {

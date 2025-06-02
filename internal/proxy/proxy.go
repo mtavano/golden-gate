@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mtavano/golden-gate/internal/models"
+	"github.com/mtavano/golden-gate/internal/types"
 	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
@@ -47,7 +47,7 @@ func (e *PrettyJSONEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Fiel
 
 type Proxy struct {
 	config      *Config
-	requestStore *models.RequestStore
+	requestStore *types.RequestStore
 	logger      *zap.Logger
 }
 
@@ -56,7 +56,7 @@ type Config struct {
 	Target     string
 }
 
-func NewProxy(config *Config, requestStore *models.RequestStore) *Proxy {
+func NewProxy(config *Config, requestStore *types.RequestStore) *Proxy {
 	// Configurar el encoder para pretty printing
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "timestamp",
@@ -99,6 +99,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p.logger.Info("request received",
 		zap.String("method", r.Method),
 		zap.String("path", r.URL.Path),
+		zap.Any("headers", r.Header),
 	)
 	
 	targetURL, err := url.Parse(p.config.Target)
@@ -131,7 +132,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the request log with the full target URL
-	reqLog := &models.RequestLog{
+	reqLog := &types.RequestLog{
 		ID:        r.Header.Get("X-Request-ID"),
 		Timestamp: time.Now(),
 		Method:    r.Method,
@@ -162,8 +163,8 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type responseTransport struct {
 	originalTransport http.RoundTripper
-	requestLog        *models.RequestLog
-	requestStore      *models.RequestStore
+	requestLog        *types.RequestLog
+	requestStore      *types.RequestStore
 	logger           *zap.Logger
 }
 
@@ -182,7 +183,7 @@ func (t *responseTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	)
 
 	// Create the response log
-	respLog := &models.ResponseLog{
+	respLog := &types.ResponseLog{
 		StatusCode: resp.StatusCode,
 		Headers:    resp.Header,
 	}
