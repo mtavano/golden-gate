@@ -124,6 +124,9 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(req.URL.Path, p.config.BasePrefix)
 		req.URL.Path = path
 		
+		// Incluir los query params del request original
+		req.URL.RawQuery = r.URL.RawQuery
+		
 		p.logger.Info("request sending",
 			zap.String("method", req.Method),
 			zap.String("url", req.URL.String()),
