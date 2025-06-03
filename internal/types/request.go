@@ -7,7 +7,9 @@ import (
 type RequestLog struct {
 	ID        string
 	Timestamp time.Time
+	Duration  time.Duration
 	Method    string
+	Path      string
 	URL       string
 	Headers   map[string][]string
 	Query     map[string][]string
@@ -42,4 +44,4 @@ func (rs *RequestStore) AddRequest(req *RequestLog) {
 
 func (rs *RequestStore) GetRequests() []*RequestLog {
 	return rs.requests
-} 
+}
