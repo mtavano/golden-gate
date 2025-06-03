@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -90,7 +89,6 @@ func NewProxy(config *Config, requestStore *types.RequestStore) *Proxy {
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	fmt.Println("---- foo")
 
 	p.logger.Info("request received",
 		zap.String("method", r.Method),
@@ -108,24 +106,16 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("-----> ", p.config.Target)
 	// Create the proxy director
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
 	proxiedURL := targetURL.String() + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
-	fmt.Println("plain path: ", r.URL.Path)
-	fmt.Println("proxied URL: ", proxiedURL)
-	fmt.Println("-proxied URL: ", proxiedURL)
 
 	// Modify the director to capture the response and keep the path
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		req.Host = targetURL.Host
-
-		// Get the path after the base_prefix
-		fmt.Println("HOST: ", targetURL.Host)
-		fmt.Println("PATH: ", targetURL.Path)
 
 		p.logger.Info("request sending",
 			zap.String("method", req.Method),
@@ -202,13 +192,11 @@ func (t *responseTransport) RoundTrip(req *http.Request) (*http.Response, error)
 		return nil, err
 	}
 
-	fmt.Println("-------------===========")
 	t.logger.Info("response received",
 		zap.Int("status", resp.StatusCode),
 		zap.Any("headers", resp.Header),
 		zap.String("url", req.URL.String()),
 	)
-	fmt.Println("-------------===========")
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
