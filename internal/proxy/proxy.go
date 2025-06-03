@@ -109,17 +109,28 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Create the proxy director
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
-	proxiedURL := targetURL.String() + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
+	var proxiedURL string
+	if strings.HasPrefix(r.URL.Path, p.config.BasePrefix) {
+		proxiedURL = targetURL.String() + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
+	} else {
+		p.logger.Error("La ruta no comienza con el BasePrefix esperado",
+			zap.String("path", r.URL.Path),
+			zap.String("basePrefix", p.config.BasePrefix),
+		)
+		http.Error(w, "Ruta no válida", http.StatusBadRequest)
+		return
+	}
 
 	// Modify the director to capture the response and keep the path
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		req.Host = targetURL.Host
+		req.URL.Path = targetURL.Path + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
 
 		p.logger.Info("request sending",
 			zap.String("method", req.Method),
-			zap.String("url", proxiedURL),
+			zap.String("url", req.URL.String()),
 			zap.Any("headers", req.Header),
 			zap.Any("query", req.URL.Query()),
 		)
