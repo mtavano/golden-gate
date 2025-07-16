@@ -16,5 +16,9 @@ cmds = [
 [start]
 cmd = './golden-gate'
 
+[variables]
+GO_ENV = 'production'
+CGO_ENABLED = '0'
+
 [static]
 dirs = ["static"] 
