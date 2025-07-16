@@ -4,42 +4,22 @@ import (
 	"time"
 )
 
+// RequestLog represents a logged HTTP request with its response
 type RequestLog struct {
-	ID        string
-	Timestamp time.Time
-	Method    string
-	URL       string
-	Headers   map[string][]string
-	Query     map[string][]string
-	Body      []byte
-	Response  *ResponseLog
+	ID        int                 `db:"id" json:"id"`
+	Method    string              `db:"method" json:"method"`
+	URL       string              `db:"url" json:"url"`
+	Timestamp time.Time           `db:"timestamp" json:"timestamp"`
+	Headers   map[string][]string `db:"headers" json:"headers"`           // JSON serialized
+	Query     map[string][]string `db:"query_params" json:"query_params"` // JSON serialized
+	Body      []byte              `db:"body" json:"body"`
+	Response  *ResponseLog        `json:"response,omitempty"`
+	CreatedAt time.Time           `db:"created_at" json:"created_at"`
 }
 
+// ResponseLog represents the HTTP response
 type ResponseLog struct {
-	StatusCode int
-	Headers    map[string][]string
-	Body       []byte
+	StatusCode int                 `db:"response_status_code" json:"status_code"`
+	Headers    map[string][]string `db:"response_headers" json:"headers"` // JSON serialized
+	Body       []byte              `db:"response_body" json:"body"`
 }
-
-type RequestStore struct {
-	requests []*RequestLog
-	maxSize  int
-}
-
-func NewRequestStore(maxSize int) *RequestStore {
-	return &RequestStore{
-		requests: make([]*RequestLog, 0),
-		maxSize:  maxSize,
-	}
-}
-
-func (rs *RequestStore) AddRequest(req *RequestLog) {
-	if len(rs.requests) >= rs.maxSize {
-		rs.requests = rs.requests[1:]
-	}
-	rs.requests = append(rs.requests, req)
-}
-
-func (rs *RequestStore) GetRequests() []*RequestLog {
-	return rs.requests
-} 

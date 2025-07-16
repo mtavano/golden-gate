@@ -1,10 +1,14 @@
 {
-  "api_1_name": {
+  "buda_api": {
     "base_prefix": "/buda",
     "target": "https://www.buda.com/api/v2"
   },
-  "api_2_name": {
+  "mtavano_cloud": {
     "base_prefix": "/cloud",
     "target": "http://cloud.mtavano.cc"
+  },
+  "test": {
+    "base_prefix": "/test",
+    "target": "https://cloud.mtavano.cc/cbt/transactions"
   }
 }

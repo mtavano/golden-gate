@@ -3,12 +3,13 @@ package views
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"unicode/utf8"
-	"github.com/mtavano/golden-gate/internal/types"
+	"github.com/mtavano/golden-gate/internal/models"
 )
 
-templ Dashboard(requests []*types.RequestLog) {
+templ Dashboard(requests []*models.RequestLog) {
 	@Layout("Golden Gate - Dashboard") {
 		<script>
 		function copyToClipboard(id) {
@@ -25,6 +26,24 @@ templ Dashboard(requests []*types.RequestLog) {
 			}
 		}
 		</script>
+		<style>
+		.content-container {
+			max-width: 100%;
+			overflow: hidden;
+		}
+		.text-content {
+			word-wrap: break-word;
+			word-break: break-all;
+			white-space: pre-wrap;
+			max-width: 100%;
+			overflow-wrap: break-word;
+		}
+		.scrollable-content {
+			max-height: 200px;
+			overflow-y: auto;
+			overflow-x: auto;
+		}
+		</style>
 		<div class="space-y-8">
 			<h1 class="text-3xl font-bold text-gray-900">Golden Gate Dashboard</h1>
 			
@@ -32,12 +51,15 @@ templ Dashboard(requests []*types.RequestLog) {
 				<h2 class="text-xl font-semibold mb-4">Últimos Requests</h2>
 				<div class="space-y-6">
 					for _, req := range requests {
-						<div class="border rounded-lg p-6 space-y-4">
+						<div class="relative border rounded-lg p-6 space-y-4 content-container">
+							<div class="absolute top-0 right-0">
+								<button class="text-red-500 hover:text-red-700 px-2 py-1" onclick="this.parentElement.parentElement.parentElement.remove()">X</button>
+							</div>
 							<div class="flex items-center justify-between border-b pb-4">
 								<div class="space-y-1">
 									<div class="flex items-center space-x-2">
 										<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">{ req.Method }</span>
-										<span class="font-mono text-gray-700">{ req.URL }</span>
+										<span class="font-mono text-gray-700 text-content break-all">{ req.URL }</span>
 									</div>
 									<div class="text-sm text-gray-500">
 										{ req.Timestamp.Format("2006-01-02 15:04:05") }
@@ -45,15 +67,15 @@ templ Dashboard(requests []*types.RequestLog) {
 								</div>
 							</div>
 
-							<div class="grid grid-cols-2 gap-6">
+							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 								<div class="space-y-4">
 									<h3 class="text-lg font-semibold text-gray-900">Request</h3>
 									
 									if len(req.Headers) > 0 {
 										<div class="space-y-2">
 											<h4 class="text-sm font-medium text-gray-700">Headers</h4>
-											<div class="bg-gray-50 rounded-lg p-3">
-												<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatHeaders(req.Headers) }</pre>
+											<div class="bg-gray-50 rounded-lg p-3 scrollable-content">
+												<pre class="text-sm font-mono text-gray-800 text-content">{ formatHeaders(req.Headers) }</pre>
 											</div>
 										</div>
 									}
@@ -61,8 +83,8 @@ templ Dashboard(requests []*types.RequestLog) {
 									if len(req.Query) > 0 {
 										<div class="space-y-2">
 											<h4 class="text-sm font-medium text-gray-700">Query Parameters</h4>
-											<div class="bg-gray-50 rounded-lg p-3">
-												<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatQueryParams(req.Query) }</pre>
+											<div class="bg-gray-50 rounded-lg p-3 scrollable-content">
+												<pre class="text-sm font-mono text-gray-800 text-content">{ formatQueryParams(req.Query) }</pre>
 											</div>
 										</div>
 									}
@@ -70,8 +92,8 @@ templ Dashboard(requests []*types.RequestLog) {
 									if len(req.Body) > 0 {
 										<div class="space-y-2">
 											<h4 class="text-sm font-medium text-gray-700">Body</h4>
-											<div class="bg-gray-50 rounded-lg p-3">
-												<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatBodySmart(req.Body) }</pre>
+											<div class="bg-gray-50 rounded-lg p-3 scrollable-content">
+												<pre class="text-sm font-mono text-gray-800 text-content">{ formatBodySmart(req.Body) }</pre>
 											</div>
 										</div>
 									}
@@ -90,13 +112,13 @@ templ Dashboard(requests []*types.RequestLog) {
 											</div>
 										</div>
 
-										<button class="text-blue-500 hover:underline" onclick="toggleVisibility('response-body-{i}')">Toggle Response Body</button>
-										<div id="response-body-{i}" style="display: none;">
+										<button class="text-blue-500 hover:underline" onclick="toggleVisibility(this.nextElementSibling.id)">Toggle Response Body</button>
+										<div id={ "response-body-" + fmt.Sprintf("%d", req.ID) } style="display: none;">
 											if len(req.Response.Body) > 0 {
 												<div class="space-y-2">
 													<h4 class="text-sm font-medium text-gray-700">Body</h4>
-													<div class="bg-gray-50 rounded-lg p-3">
-														<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ formatBodySmart(req.Response.Body) }</pre>
+													<div class="bg-gray-50 rounded-lg p-3 scrollable-content">
+														<pre class="text-sm font-mono text-gray-800 text-content">{ formatBodySmart(req.Response.Body) }</pre>
 													</div>
 												</div>
 											}
@@ -105,10 +127,10 @@ templ Dashboard(requests []*types.RequestLog) {
 								}
 							</div>
 
-							<button class="text-blue-500 hover:underline" onclick="toggleVisibility('curl-command-{i}')">Toggle Curl Command</button>
-							<div id="curl-command-{i}" style="display: none;">
-								<div class="bg-gray-50 rounded-lg p-3">
-									<pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap">{ buildCurlCommand(req) }</pre>
+							<button class="text-blue-500 hover:underline" onclick="toggleVisibility(this.nextElementSibling.id)">Toggle Curl Command</button>
+							<div id={ "curl-command-" + fmt.Sprintf("%d", req.ID) } style="display: none;">
+								<div class="bg-gray-50 rounded-lg p-3 scrollable-content">
+									<pre class="text-sm font-mono text-gray-800 text-content">{ buildCurlCommand(req) }</pre>
 								</div>
 							</div>
 						</div>
@@ -149,7 +171,7 @@ func formatBodySmart(body []byte) string {
 	return "[Non-printable or binary response]"
 }
 
-func buildCurlCommand(req *types.RequestLog) string {
+func buildCurlCommand(req *models.RequestLog) string {
 	cmd := []string{"curl", "-X", req.Method, "'" + req.URL + "'"}
 	for k, vs := range req.Headers {
 		for _, v := range vs {

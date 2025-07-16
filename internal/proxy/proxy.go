@@ -10,33 +10,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mtavano/golden-gate/internal/types"
+	"github.com/mtavano/golden-gate/internal/models"
+	"github.com/mtavano/golden-gate/internal/service"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type RequestLog struct {
-	Timestamp   time.Time     `json:"timestamp"`
-	Method      string        `json:"method"`
-	Path        string        `json:"path"`
-	Headers     http.Header   `json:"headers"`
-	RequestBody []byte        `json:"request_body"`
-	Response    ResponseLog   `json:"response"`
-	Duration    time.Duration `json:"duration"`
-}
-
-type ResponseLog struct {
-	StatusCode int         `json:"status_code"`
-	Headers    http.Header `json:"headers"`
-	Body       []byte      `json:"body"`
-}
-
 type Proxy struct {
-	config       *Config
-	requestStore *types.RequestStore
-	logger       *zap.Logger
-	client       *http.Client
-	logs         chan RequestLog
+	config     *Config
+	requestSvc *service.RequestSvc
+	logger     *zap.Logger
+	client     *http.Client
 }
 
 type Config struct {
@@ -44,7 +28,7 @@ type Config struct {
 	Target     string
 }
 
-func NewProxy(config *Config, requestStore *types.RequestStore) *Proxy {
+func NewProxy(config *Config, requestSvc *service.RequestSvc) *Proxy {
 	// config the encoder
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "timestamp",
@@ -77,19 +61,16 @@ func NewProxy(config *Config, requestStore *types.RequestStore) *Proxy {
 	logger := zap.New(core, zap.AddCaller())
 
 	return &Proxy{
-		config:       config,
-		requestStore: requestStore,
-		logger:       logger,
+		config:     config,
+		requestSvc: requestSvc,
+		logger:     logger,
 		client: &http.Client{
 			Timeout: time.Duration(5*time.Second) * time.Second,
 		},
-		logs: make(chan RequestLog, 100),
 	}
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-
 	p.logger.Info("request received",
 		zap.String("method", r.Method),
 		zap.String("path", r.URL.Path),
@@ -137,13 +118,14 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the request log with the full target URL
-	reqLog := &types.RequestLog{
-		ID:        r.Header.Get("X-Request-ID"),
+	reqLog := &models.RequestLog{
+		ID:        0, // Will be set by database
 		Timestamp: time.Now(),
 		Method:    r.Method,
 		URL:       proxiedURL,
 		Headers:   r.Header,
 		Query:     r.URL.Query(),
+		CreatedAt: time.Now(),
 	}
 
 	// Read the request body
@@ -159,38 +141,17 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	proxy.Transport = &responseTransport{
 		originalTransport: http.DefaultTransport,
 		requestLog:        reqLog,
-		requestStore:      p.requestStore,
+		requestSvc:        p.requestSvc,
 		logger:            p.logger,
 	}
 
 	proxy.ServeHTTP(w, r)
-
-	// Registrar la solicitud
-	log := RequestLog{
-		Timestamp:   start,
-		Method:      r.Method,
-		Path:        r.URL.Path,
-		Headers:     r.Header,
-		RequestBody: reqLog.Body,
-		Response: ResponseLog{
-			StatusCode: 0, // This will be set in the response transport
-			Headers:    nil,
-			Body:       nil,
-		},
-		Duration: time.Since(start),
-	}
-
-	select {
-	case p.logs <- log:
-	default:
-		// Si el canal está lleno, descartar el log
-	}
 }
 
 type responseTransport struct {
 	originalTransport http.RoundTripper
-	requestLog        *types.RequestLog
-	requestStore      *types.RequestStore
+	requestLog        *models.RequestLog
+	requestSvc        *service.RequestSvc
 	logger            *zap.Logger
 }
 
@@ -217,18 +178,18 @@ func (t *responseTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	resp.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	// Create response log
-	t.requestLog.Response = &types.ResponseLog{
+	t.requestLog.Response = &models.ResponseLog{
 		StatusCode: resp.StatusCode,
 		Headers:    resp.Header,
 		Body:       body,
 	}
 
 	// Store the request log
-	t.requestStore.AddRequest(t.requestLog)
+	if err := t.requestSvc.AddRequest(t.requestLog); err != nil {
+		t.logger.Error("failed to store request log",
+			zap.Error(err),
+		)
+	}
 
 	return resp, nil
-}
-
-func (p *Proxy) GetLogs() <-chan RequestLog {
-	return p.logs
 }
