@@ -10,7 +10,7 @@ cmds = [
 [phases.build]
 cmds = [
   '~/go/bin/templ generate ./internal/dashboard/views/',
-  'go build -o golden-gate ./cmd/main.go'
+  'GOOS=linux GOARCH=arm64 CGO_ENABLED=1 go build -o golden-gate ./cmd/main.go'
 ]
 
 [start]
@@ -19,6 +19,8 @@ cmd = './golden-gate'
 [variables]
 GO_ENV = 'production'
 CGO_ENABLED = '1'
+GOOS = 'linux'
+GOARCH = 'arm64'
 
 [static]
 dirs = ["static"] 
