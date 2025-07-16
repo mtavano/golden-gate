@@ -3,6 +3,7 @@ package views
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"unicode/utf8"
 	"github.com/mtavano/golden-gate/internal/models"
@@ -111,8 +112,8 @@ templ Dashboard(requests []*models.RequestLog) {
 											</div>
 										</div>
 
-										<button class="text-blue-500 hover:underline" onclick="toggleVisibility('response-body-{i}')">Toggle Response Body</button>
-										<div id="response-body-{i}" style="display: none;">
+										<button class="text-blue-500 hover:underline" onclick="toggleVisibility(this.nextElementSibling.id)">Toggle Response Body</button>
+										<div id={ "response-body-" + fmt.Sprintf("%d", req.ID) } style="display: none;">
 											if len(req.Response.Body) > 0 {
 												<div class="space-y-2">
 													<h4 class="text-sm font-medium text-gray-700">Body</h4>
@@ -126,8 +127,8 @@ templ Dashboard(requests []*models.RequestLog) {
 								}
 							</div>
 
-							<button class="text-blue-500 hover:underline" onclick="toggleVisibility('curl-command-{i}')">Toggle Curl Command</button>
-							<div id="curl-command-{i}" style="display: none;">
+							<button class="text-blue-500 hover:underline" onclick="toggleVisibility(this.nextElementSibling.id)">Toggle Curl Command</button>
+							<div id={ "curl-command-" + fmt.Sprintf("%d", req.ID) } style="display: none;">
 								<div class="bg-gray-50 rounded-lg p-3 scrollable-content">
 									<pre class="text-sm font-mono text-gray-800 text-content">{ buildCurlCommand(req) }</pre>
 								</div>
