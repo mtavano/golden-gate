@@ -1,25 +1,51 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/mtavano/golden-gate/internal/config"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/mtavano/golden-gate/config"
+	internalConfig "github.com/mtavano/golden-gate/internal/config"
 	"github.com/mtavano/golden-gate/internal/dashboard"
 	"github.com/mtavano/golden-gate/internal/proxy"
-	"github.com/mtavano/golden-gate/internal/types"
+	"github.com/mtavano/golden-gate/internal/service"
+	"github.com/mtavano/golden-gate/internal/storage"
+	_ "github.com/mtavano/golden-gate/migrations"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
+	// Load env
+	var conf config.Config
+	err := envconfig.Process("", &conf)
+	check(err)
+
 	// Load configuration
-	cfg, err := config.LoadConfig(config.GetConfigPath())
-	if err != nil {
-		log.Fatalf("Error loading config: %v", err)
+	cfg, err := internalConfig.LoadConfig(internalConfig.GetConfigPath())
+	check(err)
+
+	// Create database connection
+	db, err := storage.NewSqlStore(conf.DBDriver, conf.DBPath)
+	check(err)
+
+	if conf.DBDriver == "sqlite3" {
+		err = os.MkdirAll("./data", 0755)
+		check(err)
 	}
 
-	// Create the request store
-	requestStore := types.NewRequestStore(100) // Keep the last 100 requests
+	// Run migrations
+	err = goose.SetDialect(conf.DBDriver)
+	check(err)
+
+	err = goose.Up(db.DB.DB, "./migrations")
+	check(err)
+
+	// Create the request store with database
+	requestStore := service.NewRequestSvc(db)
 
 	// Create the router
 	r := mux.NewRouter()
@@ -39,8 +65,15 @@ func main() {
 	}
 
 	// Start the server
-	log.Printf("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	p := fmt.Sprintf(":%d", conf.Port)
+	log.Printf("Starting server on %s", p)
+	if err := http.ListenAndServe(p, r); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
-} 
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}

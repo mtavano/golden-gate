@@ -24,5 +24,8 @@ docker-run:
 fmt:
 	gofmt -w .
 
+create-migration:
+	@goose -dir=migrations/ create $(name)
+
 clean:
 	rm -f $(BINARY) 
