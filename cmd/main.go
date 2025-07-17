@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
@@ -28,14 +29,15 @@ func main() {
 	cfg, err := internalConfig.LoadConfig(internalConfig.GetConfigPath())
 	check(err)
 
+	// Create data directory if it doesn't exist
+	dataDir := filepath.Dir(conf.DBPath)
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		log.Fatalf("Error creating data directory: %v", err)
+	}
+
 	// Create database connection
 	db, err := storage.NewSqlStore(conf.DBDriver, conf.DBPath)
 	check(err)
-
-	if conf.DBDriver == "sqlite3" {
-		err = os.MkdirAll("./data", 0755)
-		check(err)
-	}
 
 	// Run migrations
 	err = goose.SetDialect(conf.DBDriver)
@@ -44,14 +46,14 @@ func main() {
 	err = goose.Up(db.DB.DB, "./migrations")
 	check(err)
 
-	// Create the request store with database
-	requestStore := service.NewRequestSvc(db)
+	// Create the request service with database
+	requestSvc := service.NewRequestSvc(db)
 
 	// Create the router
 	r := mux.NewRouter()
 
 	// Set up the dashboard
-	dashboardHandler := dashboard.NewHandler(requestStore)
+	dashboardHandler := dashboard.NewHandler(requestSvc)
 	r.Handle("/dashboard", dashboardHandler)
 
 	// Set up proxies for each service
@@ -60,7 +62,7 @@ func main() {
 			BasePrefix: serviceConfig.BasePrefix,
 			Target:     serviceConfig.Target,
 		}
-		proxyHandler := proxy.NewProxy(proxyConfig, requestStore)
+		proxyHandler := proxy.NewProxy(proxyConfig, requestSvc)
 		r.PathPrefix(serviceConfig.BasePrefix).Handler(proxyHandler)
 	}
 
