@@ -12,6 +12,12 @@
 *.coverprofile
 vendor/
 
+# Database files
+data/
+*.db
+*.sqlite
+*.sqlite3
+
 # Vim
 *.swp
 *.swo
