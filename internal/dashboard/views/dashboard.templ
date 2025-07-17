@@ -25,6 +25,13 @@ templ Dashboard(requests []*models.RequestLog) {
 				el.style.display = "none";
 			}
 		}
+
+		function deleteRequest(button) {
+			const requestContainer = button.closest('[id^="request-"]');
+			if (requestContainer) {
+				requestContainer.remove();
+			}
+		}
 		</script>
 		<style>
 		.content-container {
@@ -51,9 +58,9 @@ templ Dashboard(requests []*models.RequestLog) {
 				<h2 class="text-xl font-semibold mb-4">Últimos Requests</h2>
 				<div class="space-y-6">
 					for _, req := range requests {
-						<div class="relative border rounded-lg p-6 space-y-4 content-container">
+						<div id={ "request-" + fmt.Sprintf("%d", req.ID) } class="relative border rounded-lg p-6 space-y-4 content-container">
 							<div class="absolute top-0 right-0">
-								<button class="text-red-500 hover:text-red-700 px-2 py-1" onclick="this.parentElement.parentElement.parentElement.remove()">X</button>
+								<button class="text-red-500 hover:text-red-700 px-2 py-1" onclick="deleteRequest(this)">X</button>
 							</div>
 							<div class="flex items-center justify-between border-b pb-4">
 								<div class="space-y-1">
