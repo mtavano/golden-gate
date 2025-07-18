@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"unicode/utf8"
 	"github.com/mtavano/golden-gate/internal/models"
 )
 
@@ -165,17 +164,60 @@ func formatHeaders(headers map[string][]string) string {
 }
 
 func formatBodySmart(body []byte) string {
-	// Try to pretty-print as JSON
+	if len(body) == 0 {
+		return "[Empty body]"
+	}
+
+	// Try to pretty-print as JSON first
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, body, "", "  "); err == nil {
-		return prettyJSON.String()
+		result := prettyJSON.String()
+		if len(result) > 10000 {
+			return result[:10000] + fmt.Sprintf("\n\n... [Truncated - Full size: %d bytes]", len(body))
+		}
+		return result
 	}
-	// If not JSON, check if it's valid UTF-8 (plain text)
-	if utf8.Valid(body) {
-		return string(body)
+
+	// Check if it's mostly printable text (more permissive than utf8.Valid)
+	printableCount := 0
+	for _, b := range body {
+		if b >= 32 && b <= 126 || b == 9 || b == 10 || b == 13 {
+			printableCount++
+		}
 	}
-	// If not, show a message
-	return "[Non-printable or binary response]"
+
+	// If more than 70% is printable, treat it as text
+	if float64(printableCount)/float64(len(body)) > 0.7 {
+		bodyStr := string(body)
+		if len(bodyStr) > 10000 {
+			return bodyStr[:10000] + fmt.Sprintf("\n\n... [Truncated - Full size: %d bytes]", len(body))
+		}
+		return bodyStr
+	}
+
+	// For truly binary content, show a preview in hex
+	preview := body
+	if len(preview) > 100 {
+		preview = preview[:100]
+	}
+	
+	hexStr := ""
+	for i, b := range preview {
+		if i > 0 && i%16 == 0 {
+			hexStr += "\n"
+		}
+		hexStr += fmt.Sprintf("%02x ", b)
+	}
+	
+	return fmt.Sprintf("[Binary content - Size: %d bytes]\nHex preview:\n%s%s", 
+		len(body), 
+		hexStr,
+		func() string {
+			if len(body) > 100 {
+				return "\n..."
+			}
+			return ""
+		}())
 }
 
 func buildCurlCommand(req *models.RequestLog) string {
