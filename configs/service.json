@@ -10,5 +10,9 @@
   "test": {
     "base_prefix": "/test",
     "target": "https://cloud.mtavano.cc/cbt/transactions"
+  },
+  "logsnag": {
+    "base_prefix": "/logsnag",
+    "taget": "https://api.logsnag.com/v1/log"
   }
 }
