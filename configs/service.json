@@ -13,6 +13,6 @@
   },
   "logsnag": {
     "base_prefix": "/logsnag",
-    "taget": "https://api.logsnag.com/v1/log"
+    "target": "https://api.logsnag.com/v1/log"
   }
 }
