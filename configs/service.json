@@ -14,5 +14,9 @@
   "logsnag": {
     "base_prefix": "/logsnag",
     "target": "https://api.logsnag.com/v1/log"
+  },
+  "getxerpa": {
+    "base_prefix": "/getxerpa",
+    "target": "https://sandbox.getxerpa.com/data-enrichment"
   }
 }
