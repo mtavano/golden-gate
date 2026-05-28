@@ -36,6 +36,15 @@ type ExploreView struct {
 	Location    *time.Location
 }
 
+// EditorView holds the state of the service.json browser editor.
+type EditorView struct {
+	Path         string
+	Content      string
+	Error        string
+	Success      bool
+	ServiceCount int
+}
+
 // formatTime renders an absolute time in the dashboard timezone.
 func formatTime(t time.Time, loc *time.Location) string {
 	if loc == nil {

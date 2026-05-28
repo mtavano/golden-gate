@@ -9,7 +9,10 @@ templ Dashboard(cards []ServiceCard, loc *time.Location) {
 	@Layout("Golden Gate — Dashboard") {
 		<div class="space-y-8">
 			<header class="flex items-baseline justify-between">
-				<h1 class="text-3xl font-bold text-gray-900">Golden Gate</h1>
+				<div class="flex items-baseline">
+					<h1 class="text-3xl font-bold text-gray-900">Golden Gate</h1>
+					<a href="/dashboard/config" class="text-sm text-gray-600 hover:text-gray-900 ml-4">⚙ Editar config</a>
+				</div>
 				<span class="text-sm text-gray-500">{ fmt.Sprintf("TZ: %s", loc.String()) }</span>
 			</header>
 

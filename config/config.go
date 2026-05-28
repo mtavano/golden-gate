@@ -9,4 +9,8 @@ type Config struct {
 	TimeZone     string `envconfig:"time_zone" default:"America/Santiago"`
 	Port         int    `envconfig:"port" default:"8080"`
 	MaxBodyBytes int    `envconfig:"max_body_bytes" default:"1048576"`
+
+	// Editor (dashboard /config) basic-auth credentials
+	EditorUser string `envconfig:"editor_user" default:"admin"`
+	EditorPass string `envconfig:"editor_pass" default:"supersecurepassword"`
 }

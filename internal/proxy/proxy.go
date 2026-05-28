@@ -117,6 +117,12 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		req.Host = targetURL.Host
 		req.URL.Path = targetURL.Path + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
 
+		// Force upstream to respond with an identity (uncompressed) body so the
+		// stored audit copy is always human-readable. Without this, upstreams
+		// behind Cloudflare may respond with brotli/zstd/etc which we cannot
+		// decode here, leaving the dashboard with binary garbage.
+		req.Header.Del("Accept-Encoding")
+
 		p.logger.Info("request sending",
 			zap.String("service", p.config.ServiceName),
 			zap.String("method", req.Method),
@@ -143,7 +149,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reverseProxy.Transport = &responseTransport{
-		originalTransport: http.DefaultTransport,
+		originalTransport: identityTransport(),
 		requestLog:        reqLog,
 		requestSvc:        p.requestSvc,
 		logger:            p.logger,
@@ -216,6 +222,22 @@ func (t *responseTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	}
 
 	return resp, nil
+}
+
+// identityTransport returns an http.RoundTripper that will NOT transparently
+// add "Accept-Encoding: gzip" to outbound requests. Combined with stripping
+// Accept-Encoding in the Director, this guarantees the upstream always answers
+// with an identity (uncompressed) body, so the persisted audit copy is
+// human-readable regardless of which codecs (gzip, br, zstd, ...) the
+// upstream supports.
+func identityTransport() http.RoundTripper {
+	base, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return http.DefaultTransport
+	}
+	t := base.Clone()
+	t.DisableCompression = true
+	return t
 }
 
 // gunzip decompresses a gzip-encoded payload.

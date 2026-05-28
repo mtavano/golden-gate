@@ -15,6 +15,7 @@ import (
 	"github.com/mtavano/golden-gate/config"
 	internalConfig "github.com/mtavano/golden-gate/internal/config"
 	"github.com/mtavano/golden-gate/internal/dashboard"
+	"github.com/mtavano/golden-gate/internal/middleware"
 	"github.com/mtavano/golden-gate/internal/proxy"
 	"github.com/mtavano/golden-gate/internal/service"
 	"github.com/mtavano/golden-gate/internal/storage"
@@ -50,10 +51,18 @@ func main() {
 	dispatcher := proxy.NewDispatcher(requestSvc, conf.MaxBodyBytes, logger)
 	cfgMgr.Subscribe(dispatcher.Update)
 
-	dashboardHandler := dashboard.NewHandler(requestSvc, cfgMgr)
+	dashboardHandler := dashboard.NewHandler(requestSvc, cfgMgr).
+		SetLocation(conf.TimeZone).
+		WithConfigPath(conf.ConfigPath)
+
+	editorRealm := "golden-gate"
+	editorGet := middleware.BasicAuth(dashboardHandler.EditorGetHandler(), conf.EditorUser, conf.EditorPass, editorRealm)
+	editorPost := middleware.BasicAuth(dashboardHandler.EditorPostHandler(), conf.EditorUser, conf.EditorPass, editorRealm)
 
 	r := mux.NewRouter()
 	r.Handle("/dashboard", dashboardHandler).Methods(http.MethodGet)
+	r.Handle("/dashboard/config", editorGet).Methods(http.MethodGet)
+	r.Handle("/dashboard/config", editorPost).Methods(http.MethodPost)
 	r.Handle("/dashboard/services/{name}", dashboardHandler.ExploreHandler()).Methods(http.MethodGet)
 	r.PathPrefix("/").Handler(dispatcher)
 

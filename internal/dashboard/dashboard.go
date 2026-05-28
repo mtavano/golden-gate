@@ -1,7 +1,12 @@
 package dashboard
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"time"
@@ -23,6 +28,7 @@ type Handler struct {
 	requestSvc *service.RequestSvc
 	cfgMgr     *internalConfig.Manager
 	loc        *time.Location
+	configPath string
 }
 
 func NewHandler(requestSvc *service.RequestSvc, cfgMgr *internalConfig.Manager) *Handler {
@@ -47,6 +53,14 @@ func (h *Handler) SetLocation(tz string) *Handler {
 	if err == nil {
 		h.loc = loc
 	}
+	return h
+}
+
+// WithConfigPath enables the browser editor by pointing it at the absolute
+// path of the service.json file on disk. Returns the handler to allow
+// chaining from main.
+func (h *Handler) WithConfigPath(path string) *Handler {
+	h.configPath = path
 	return h
 }
 
@@ -161,4 +175,106 @@ func (h *Handler) parseLocalTime(s string, fallback time.Time) time.Time {
 		return fallback
 	}
 	return t
+}
+
+// EditorGetHandler renders the browser editor for service.json at
+// /dashboard/config. Returns 503 if the editor was not enabled via
+// WithConfigPath.
+func (h *Handler) EditorGetHandler() http.Handler {
+	return http.HandlerFunc(h.editorGet)
+}
+
+// EditorPostHandler accepts a POST to /dashboard/config with the raw JSON
+// content in the "content" form field, validates it, and writes it
+// atomically. Hot reload is triggered by the existing fsnotify watcher.
+func (h *Handler) EditorPostHandler() http.Handler {
+	return http.HandlerFunc(h.editorPost)
+}
+
+func (h *Handler) editorGet(w http.ResponseWriter, r *http.Request) {
+	if h.configPath == "" {
+		http.Error(w, "editor disabled (config path not set)", http.StatusServiceUnavailable)
+		return
+	}
+
+	var content string
+	raw, err := os.ReadFile(h.configPath)
+	switch {
+	case err == nil:
+		var pretty bytes.Buffer
+		if jerr := json.Indent(&pretty, raw, "", "  "); jerr == nil {
+			content = pretty.String()
+		} else {
+			content = string(raw)
+		}
+	case os.IsNotExist(err):
+		content = ""
+	default:
+		http.Error(w, "Error reading config: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view := views.EditorView{
+		Path:         h.configPath,
+		Content:      content,
+		Success:      r.URL.Query().Get("ok") == "1",
+		ServiceCount: len(h.cfgMgr.Current().Services),
+	}
+	views.Editor(view).Render(r.Context(), w)
+}
+
+func (h *Handler) editorPost(w http.ResponseWriter, r *http.Request) {
+	if h.configPath == "" {
+		http.Error(w, "editor disabled (config path not set)", http.StatusServiceUnavailable)
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Error parsing form: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	content := r.FormValue("content")
+
+	renderError := func(msg string) {
+		view := views.EditorView{
+			Path:         h.configPath,
+			Content:      content,
+			Error:        msg,
+			ServiceCount: len(h.cfgMgr.Current().Services),
+		}
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		views.Editor(view).Render(r.Context(), w)
+	}
+
+	var services map[string]internalConfig.ServiceConfig
+	if err := json.Unmarshal([]byte(content), &services); err != nil {
+		renderError("JSON inválido: " + err.Error())
+		return
+	}
+
+	cfg := &internalConfig.Config{Services: services}
+	if err := internalConfig.Validate(cfg); err != nil {
+		renderError("Configuración inválida: " + err.Error())
+		return
+	}
+
+	dir := filepath.Dir(h.configPath)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		http.Error(w, "Error creating directory: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmp := filepath.Join(dir, fmt.Sprintf(".service.json.tmp.%d", time.Now().UnixNano()))
+	if err := os.WriteFile(tmp, []byte(content), 0o644); err != nil {
+		os.Remove(tmp)
+		http.Error(w, "Error writing temp file: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.Rename(tmp, h.configPath); err != nil {
+		os.Remove(tmp)
+		http.Error(w, "Error replacing config: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/dashboard/config?ok=1", http.StatusSeeOther)
 }
