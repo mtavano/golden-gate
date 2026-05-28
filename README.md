@@ -47,6 +47,7 @@ A request to `http://localhost:8080/buda/markets` is forwarded to `https://www.b
 | `PORT` | `8080` | HTTP listen port |
 | `DB_DRIVER` | `sqlite` | Database driver (only `sqlite` is wired up) |
 | `DB_PATH` | `./data/golden_gate.db` | SQLite file path. In Docker, use `/data/golden_gate.db` with a mounted volume. |
+| `CONFIG_PATH` | `./configs/service.json` | Path to the service.json. In Docker it lives on the volume (`/data/service.json`); edits are hot-reloaded. |
 | `MAX_BODY_BYTES` | `1048576` | Max bytes persisted per request/response body. Larger bodies are truncated and flagged. |
 | `TIME_ZONE` | `America/Santiago` | Display timezone for the dashboard (storage stays UTC) |
 | `ENVIRONMENT` | `development` | Reserved for future use |
@@ -63,6 +64,20 @@ The following headers have their values replaced with `[REDACTED]` in stored log
 
 - `GET /dashboard` — cards, one per configured service plus an "huérfano" card for any historical data whose service is no longer in `service.json`. Click a card to drill in.
 - `GET /dashboard/services/{name}?from=…&to=…&page=…` — explore page. Defaults to the last 24h in `TIME_ZONE`. Paginates 50 requests per page.
+
+## Hot reload of services
+
+The service.json is watched at runtime. Add, remove or edit entries while the
+server is running and the dispatcher swaps the routing table within ~300 ms
+without dropping in-flight requests. On invalid configs (missing target,
+duplicate prefix, prefix colliding with `/dashboard`) the previous snapshot is
+kept and the error is logged — the app never serves a broken table.
+
+In production with the Coolify volume mounted, edit
+`/mnt/hd1/golden-gate/service.json` on the host (or `/data/service.json` from
+inside the container) and the change applies on the next debounce tick.
+Bootstrap: if `CONFIG_PATH` does not exist on first boot, Golden Gate writes
+its embedded default (the one shipped in the binary) to that location.
 
 ## Docker
 

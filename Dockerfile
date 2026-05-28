@@ -14,8 +14,10 @@ RUN apk add --no-cache ca-certificates tzdata && mkdir -p /data
 COPY --from=build /app/golden-gate ./golden-gate
 COPY configs ./configs
 
-# Persisted SQLite lives in /data; mount a volume here in production.
+# Persisted SQLite + service.json live in /data; mount a volume here in
+# production so both survive redeploys.
 VOLUME ["/data"]
 ENV DB_PATH=/data/golden_gate.db
+ENV CONFIG_PATH=/data/service.json
 EXPOSE 8080
 CMD ["./golden-gate"]

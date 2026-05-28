@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
@@ -17,6 +20,7 @@ import (
 	"github.com/mtavano/golden-gate/internal/storage"
 	"github.com/mtavano/golden-gate/migrations"
 	"github.com/pressly/goose/v3"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -24,11 +28,10 @@ func main() {
 	err := envconfig.Process("", &conf)
 	check(err)
 
-	cfg, err := internalConfig.LoadConfig(internalConfig.GetConfigPath())
-	check(err)
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
-	dataDir := filepath.Dir(conf.DBPath)
-	if err := os.MkdirAll(dataDir, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(conf.DBPath), 0o755); err != nil {
 		log.Fatalf("Error creating data directory: %v", err)
 	}
 
@@ -39,28 +42,44 @@ func main() {
 	goose.SetBaseFS(migrations.EmbeddedFS)
 	check(goose.Up(db.DB.DB, "."))
 
+	cfgMgr, err := internalConfig.NewManager(conf.ConfigPath, logger)
+	check(err)
+
 	requestSvc := service.NewRequestSvc(db)
 
-	r := mux.NewRouter()
+	dispatcher := proxy.NewDispatcher(requestSvc, conf.MaxBodyBytes, logger)
+	cfgMgr.Subscribe(dispatcher.Update)
 
-	dashboardHandler := dashboard.NewHandler(requestSvc, cfg)
+	dashboardHandler := dashboard.NewHandler(requestSvc, cfgMgr)
+
+	r := mux.NewRouter()
 	r.Handle("/dashboard", dashboardHandler).Methods(http.MethodGet)
 	r.Handle("/dashboard/services/{name}", dashboardHandler.ExploreHandler()).Methods(http.MethodGet)
+	r.PathPrefix("/").Handler(dispatcher)
 
-	for name, serviceConfig := range cfg.Services {
-		proxyConfig := &proxy.Config{
-			ServiceName:  name,
-			BasePrefix:   serviceConfig.BasePrefix,
-			Target:       serviceConfig.Target,
-			MaxBodyBytes: conf.MaxBodyBytes,
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	go func() {
+		if err := cfgMgr.Watch(ctx); err != nil {
+			logger.Error("config watcher exited", zap.Error(err))
 		}
-		proxyHandler := proxy.NewProxy(proxyConfig, requestSvc)
-		r.PathPrefix(serviceConfig.BasePrefix).Handler(proxyHandler)
+	}()
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", conf.Port),
+		Handler: r,
 	}
 
-	p := fmt.Sprintf(":%d", conf.Port)
-	log.Printf("Starting server on %s", p)
-	if err := http.ListenAndServe(p, r); err != nil {
+	go func() {
+		<-ctx.Done()
+		shutdownCtx, shutdownCancel := context.WithCancel(context.Background())
+		defer shutdownCancel()
+		_ = srv.Shutdown(shutdownCtx)
+	}()
+
+	logger.Info("starting server", zap.String("addr", srv.Addr), zap.String("config", conf.ConfigPath))
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Error starting server: %v", err)
 	}
 }

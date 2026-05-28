@@ -21,18 +21,18 @@ const (
 
 type Handler struct {
 	requestSvc *service.RequestSvc
-	cfg        *internalConfig.Config
+	cfgMgr     *internalConfig.Manager
 	loc        *time.Location
 }
 
-func NewHandler(requestSvc *service.RequestSvc, cfg *internalConfig.Config) *Handler {
+func NewHandler(requestSvc *service.RequestSvc, cfgMgr *internalConfig.Manager) *Handler {
 	loc, err := time.LoadLocation(fallbackTimeZone)
 	if err != nil {
 		loc = time.UTC
 	}
 	return &Handler{
 		requestSvc: requestSvc,
-		cfg:        cfg,
+		cfgMgr:     cfgMgr,
 		loc:        loc,
 	}
 }
@@ -57,8 +57,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cards := make([]views.ServiceCard, 0, len(h.cfg.Services)+len(stats))
-	for name, svc := range h.cfg.Services {
+	cards := make([]views.ServiceCard, 0, len(h.cfgMgr.Current().Services)+len(stats))
+	for name, svc := range h.cfgMgr.Current().Services {
 		s := stats[name]
 		cards = append(cards, views.ServiceCard{
 			Name:          name,
@@ -98,7 +98,7 @@ func (h *Handler) ExploreHandler() http.Handler {
 
 func (h *Handler) explore(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["name"]
-	svc, configured := h.cfg.Services[name]
+	svc, configured := h.cfgMgr.Current().Services[name]
 	if !configured && name != "unknown" {
 		http.NotFound(w, r)
 		return

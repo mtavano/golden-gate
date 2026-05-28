@@ -1,0 +1,22 @@
+{
+  "buda_api": {
+    "base_prefix": "/buda",
+    "target": "https://www.buda.com/api/v2"
+  },
+  "mtavano_cloud": {
+    "base_prefix": "/cloud",
+    "target": "http://cloud.mtavano.cc"
+  },
+  "test": {
+    "base_prefix": "/test",
+    "target": "https://cloud.mtavano.cc/cbt/transactions"
+  },
+  "logsnag": {
+    "base_prefix": "/logsnag",
+    "target": "https://api.logsnag.com/v1/log"
+  },
+  "getxerpa": {
+    "base_prefix": "/getxerpa",
+    "target": "https://sandbox.getxerpa.com/data-enrichment"
+  }
+}
