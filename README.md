@@ -1,72 +1,101 @@
 # Golden Gate
 
-Golden Gate is a reverse proxy to debug and visualize requests/responses to external APIs, with a real-time dashboard.
+Reverse proxy in Go to debug and visualize requests/responses to external APIs, with a server-rendered dashboard.
+
+## Features
+- One proxy per service declared in `configs/service.json`.
+- Persistent request/response log in SQLite (file-based, survives redeploy when mounted on a volume).
+- Per-service dashboard with cards, click-through to an explore page with time-range filtering.
+- Automatic gzip decompression so JSON responses render readable.
+- Body truncation at a configurable size, sensitive header redaction in stored logs.
 
 ## Requirements
-- Go 1.20+
-- [templ](https://templ.guide/) (for generating views)
+- Go 1.23+
+- [templ](https://templ.guide/) v0.3.924 (`go install github.com/a-h/templ/cmd/templ@v0.3.924`)
 - Docker (optional)
-- Nixpacks (optional)
 
-## Local Installation & Usage
+## Local install & run
 
-1. Install dependencies:
-   ```sh
-   go mod download
-   go install github.com/a-h/templ/cmd/templ@latest
-   ```
+```sh
+go mod download
+go install github.com/a-h/templ/cmd/templ@v0.3.924
+make run
+```
 
-2. Generate view files:
-   ```sh
-   make generate
-   ```
-
-3. Build and run:
-   ```sh
-   make run
-   ```
-
-4. Access the dashboard at [http://localhost:8080/dashboard](http://localhost:8080/dashboard)
+Dashboard at <http://localhost:8080/dashboard>.
 
 ## Configuration
 
-Edit the `configs/service.json` file to define the services to proxy:
+### `configs/service.json`
+Define proxied services:
 
 ```json
 {
-  "api_1_name": {
-    "base_prefix": "/cloud",
-    "target": "http://example.cc"
+  "buda_api": {
+    "base_prefix": "/buda",
+    "target": "https://www.buda.com/api/v2"
   }
 }
 ```
 
+A request to `http://localhost:8080/buda/markets` is forwarded to `https://www.buda.com/api/v2/markets`.
+
+### Environment variables
+
+| Var | Default | Purpose |
+|---|---|---|
+| `PORT` | `8080` | HTTP listen port |
+| `DB_DRIVER` | `sqlite` | Database driver (only `sqlite` is wired up) |
+| `DB_PATH` | `./data/golden_gate.db` | SQLite file path. In Docker, use `/data/golden_gate.db` with a mounted volume. |
+| `MAX_BODY_BYTES` | `1048576` | Max bytes persisted per request/response body. Larger bodies are truncated and flagged. |
+| `TIME_ZONE` | `America/Santiago` | Display timezone for the dashboard (storage stays UTC) |
+| `ENVIRONMENT` | `development` | Reserved for future use |
+
+### Redacted headers
+The following headers have their values replaced with `[REDACTED]` in stored logs (still forwarded untouched to the upstream):
+
+- `Authorization`
+- `Cookie`, `Set-Cookie`
+- `Proxy-Authorization`
+- `X-Api-Key`
+
+## Dashboard
+
+- `GET /dashboard` — cards, one per configured service plus an "huérfano" card for any historical data whose service is no longer in `service.json`. Click a card to drill in.
+- `GET /dashboard/services/{name}?from=…&to=…&page=…` — explore page. Defaults to the last 24h in `TIME_ZONE`. Paginates 50 requests per page.
+
 ## Docker
 
-1. Build the image:
-   ```sh
-   docker build -t golden-gate .
-   ```
+```sh
+docker build -t golden-gate .
+docker run -p 8080:8080 \
+  -v $(pwd)/configs:/app/configs \
+  -v $(pwd)/data:/data \
+  golden-gate
+```
 
-2. Run the container:
-   ```sh
-   docker run -p 8080:8080 -v $(pwd)/configs:/app/configs golden-gate
-   ```
+The image exposes port `8080`, declares `/data` as a volume and pre-sets `DB_PATH=/data/golden_gate.db`.
 
-## Nixpacks
+## Coolify deploy
 
-1. Build the image:
-   ```sh
-   nixpacks build . -o golden-gate-nixpacks
-   ```
+Golden Gate is designed to run on Coolify with the SQLite file persisted to the host. Use this layout:
 
-2. Run the image:
-   ```sh
-   docker run -p 8080:8080 -v $(pwd)/configs:/app/configs golden-gate-nixpacks
-   ```
+1. **Volume mount** — host path `/mnt/hd1/golden-gate/` ↔ container path `/data`.
+2. **Env vars** — leave `DB_PATH=/data/golden_gate.db` (already set in the Dockerfile). Optionally override `MAX_BODY_BYTES`, `TIME_ZONE`.
+3. **Build** — the Dockerfile is self-contained: `templ generate` runs at build time, migrations are embedded in the binary so no runtime filesystem dependency.
 
----
+After a redeploy, the SQLite file remains under `/mnt/hd1/golden-gate/golden_gate.db` on the host and historical logs survive.
 
-## Image Reference
+To purge logs manually:
 
-The Docker/Nixpacks image exposes port 8080 and expects the configuration file at `/app/configs/service.json`. 
+```sh
+sqlite3 /mnt/hd1/golden-gate/golden_gate.db "DELETE FROM request_logs WHERE created_at < datetime('now', '-30 days');"
+```
+
+## Generate views
+
+```sh
+make generate
+```
+
+Regenerates the `*_templ.go` files in `internal/dashboard/views/`.

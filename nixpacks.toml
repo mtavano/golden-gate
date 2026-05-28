@@ -4,7 +4,7 @@ nixPkgs = ['go']
 [phases.install]
 cmds = [
   'go mod download',
-  'go install github.com/a-h/templ/cmd/templ@latest'
+  'go install github.com/a-h/templ/cmd/templ@v0.3.924'
 ]
 
 [phases.build]

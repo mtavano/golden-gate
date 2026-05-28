@@ -2,11 +2,13 @@ package proxy
 
 import (
 	"bytes"
+	"compress/gzip"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +18,19 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const defaultMaxBodyBytes = 1 << 20 // 1 MiB
+
+// redactedHeaders lists header names whose values must be replaced with
+// [REDACTED] when persisting RequestLog. They are still sent to the upstream
+// untouched — redaction only applies to the audit copy.
+var redactedHeaders = map[string]struct{}{
+	"authorization":       {},
+	"cookie":              {},
+	"set-cookie":          {},
+	"proxy-authorization": {},
+	"x-api-key":           {},
+}
+
 type Proxy struct {
 	config     *Config
 	requestSvc *service.RequestSvc
@@ -24,12 +39,17 @@ type Proxy struct {
 }
 
 type Config struct {
-	BasePrefix string
-	Target     string
+	ServiceName  string
+	BasePrefix   string
+	Target       string
+	MaxBodyBytes int
 }
 
 func NewProxy(config *Config, requestSvc *service.RequestSvc) *Proxy {
-	// config the encoder
+	if config.MaxBodyBytes <= 0 {
+		config.MaxBodyBytes = defaultMaxBodyBytes
+	}
+
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "timestamp",
 		LevelKey:       "level",
@@ -44,20 +64,15 @@ func NewProxy(config *Config, requestSvc *service.RequestSvc) *Proxy {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	// create base encoding
 	baseEncoder := zapcore.NewJSONEncoder(encoderConfig)
-
-	// wrap the encode with custom encoder
 	prettyEncoder := &PrettyJSONEncoder{Encoder: baseEncoder}
 
-	// Create in the core with custom encoder
 	core := zapcore.NewCore(
 		prettyEncoder,
 		zapcore.AddSync(os.Stdout),
 		zapcore.InfoLevel,
 	)
 
-	// Crear el logger con el core
 	logger := zap.New(core, zap.AddCaller())
 
 	return &Proxy{
@@ -65,36 +80,27 @@ func NewProxy(config *Config, requestSvc *service.RequestSvc) *Proxy {
 		requestSvc: requestSvc,
 		logger:     logger,
 		client: &http.Client{
-			Timeout: time.Duration(5*time.Second) * time.Second,
+			Timeout: 30 * time.Second,
 		},
 	}
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p.logger.Info("request received",
+		zap.String("service", p.config.ServiceName),
 		zap.String("method", r.Method),
 		zap.String("path", r.URL.Path),
 	)
 
-	//  + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
 	targetURL, err := url.Parse(p.config.Target)
 	if err != nil {
-		p.logger.Error("invalid target URL",
-			zap.Error(err),
-		)
-
+		p.logger.Error("invalid target URL", zap.Error(err))
 		http.Error(w, "Invalid target URL", http.StatusInternalServerError)
 		return
 	}
 
-	// Create the proxy director
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-
-	var proxiedURL string
-	if strings.HasPrefix(r.URL.Path, p.config.BasePrefix) {
-		proxiedURL = targetURL.String() + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
-	} else {
-		p.logger.Error("La ruta no comienza con el BasePrefix esperado",
+	if !strings.HasPrefix(r.URL.Path, p.config.BasePrefix) {
+		p.logger.Error("path does not match expected BasePrefix",
 			zap.String("path", r.URL.Path),
 			zap.String("basePrefix", p.config.BasePrefix),
 		)
@@ -102,50 +108,50 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Modify the director to capture the response and keep the path
-	originalDirector := proxy.Director
-	proxy.Director = func(req *http.Request) {
+	proxiedURL := targetURL.String() + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
+
+	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
+	originalDirector := reverseProxy.Director
+	reverseProxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		req.Host = targetURL.Host
 		req.URL.Path = targetURL.Path + strings.TrimPrefix(r.URL.Path, p.config.BasePrefix)
 
 		p.logger.Info("request sending",
+			zap.String("service", p.config.ServiceName),
 			zap.String("method", req.Method),
 			zap.String("url", req.URL.String()),
-			zap.Any("headers", req.Header),
-			zap.Any("query", req.URL.Query()),
 		)
 	}
 
-	// Create the request log with the full target URL
 	reqLog := &models.RequestLog{
-		ID:        0, // Will be set by database
-		Timestamp: time.Now(),
-		Method:    r.Method,
-		URL:       proxiedURL,
-		Headers:   r.Header,
-		Query:     r.URL.Query(),
-		CreatedAt: time.Now(),
+		ServiceName: p.config.ServiceName,
+		Timestamp:   time.Now(),
+		Method:      r.Method,
+		URL:         proxiedURL,
+		Headers:     redactHeaders(r.Header),
+		Query:       r.URL.Query(),
+		CreatedAt:   time.Now(),
 	}
 
-	// Read the request body
 	if r.Body != nil {
 		body, err := io.ReadAll(r.Body)
 		if err == nil {
-			reqLog.Body = body
-			r.Body = io.NopCloser(strings.NewReader(string(body)))
+			reqLog.Body, reqLog.BodyTruncated = truncate(body, p.config.MaxBodyBytes)
+			r.Body = io.NopCloser(bytes.NewReader(body))
 		}
 	}
 
-	// Modify the transport to capture the response
-	proxy.Transport = &responseTransport{
+	reverseProxy.Transport = &responseTransport{
 		originalTransport: http.DefaultTransport,
 		requestLog:        reqLog,
 		requestSvc:        p.requestSvc,
 		logger:            p.logger,
+		maxBodyBytes:      p.config.MaxBodyBytes,
+		startedAt:         time.Now(),
 	}
 
-	proxy.ServeHTTP(w, r)
+	reverseProxy.ServeHTTP(w, r)
 }
 
 type responseTransport struct {
@@ -153,43 +159,102 @@ type responseTransport struct {
 	requestLog        *models.RequestLog
 	requestSvc        *service.RequestSvc
 	logger            *zap.Logger
+	maxBodyBytes      int
+	startedAt         time.Time
 }
 
 func (t *responseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err := t.originalTransport.RoundTrip(req)
 	if err != nil {
-		t.logger.Error("failed to send request",
-			zap.Error(err),
-		)
+		t.logger.Error("failed to send request", zap.Error(err))
 		return nil, err
 	}
 
-	t.logger.Info("response received",
-		zap.Int("status", resp.StatusCode),
-		zap.Any("headers", resp.Header),
-		zap.String("url", req.URL.String()),
-	)
-
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
+	rawBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	resp.Body = io.NopCloser(bytes.NewBuffer(body))
+	resp.Body.Close()
 
-	// Create response log
-	t.requestLog.Response = &models.ResponseLog{
-		StatusCode: resp.StatusCode,
-		Headers:    resp.Header,
-		Body:       body,
+	// Decompress gzip responses so the persisted body is human-readable JSON
+	// and so the body shown to the client matches what we store.
+	decoded := rawBody
+	encoding := strings.ToLower(strings.TrimSpace(resp.Header.Get("Content-Encoding")))
+	if encoding == "gzip" {
+		if d, derr := gunzip(rawBody); derr == nil {
+			decoded = d
+			resp.Header.Del("Content-Encoding")
+			resp.Header.Set("Content-Length", strconv.Itoa(len(decoded)))
+		} else {
+			t.logger.Warn("failed to decompress gzip response, falling back to raw bytes",
+				zap.Error(derr),
+			)
+		}
 	}
 
-	// Store the request log
+	resp.Body = io.NopCloser(bytes.NewBuffer(decoded))
+
+	storedBody, truncated := truncate(decoded, t.maxBodyBytes)
+
+	t.requestLog.DurationMs = time.Since(t.startedAt).Milliseconds()
+	t.requestLog.Response = &models.ResponseLog{
+		StatusCode:    resp.StatusCode,
+		Headers:       redactHeaders(resp.Header),
+		Body:          storedBody,
+		BodyTruncated: truncated,
+	}
+
+	t.logger.Info("response received",
+		zap.String("service", t.requestLog.ServiceName),
+		zap.Int("status", resp.StatusCode),
+		zap.Int64("duration_ms", t.requestLog.DurationMs),
+		zap.String("url", req.URL.String()),
+	)
+
 	if err := t.requestSvc.AddRequest(t.requestLog); err != nil {
-		t.logger.Error("failed to store request log",
-			zap.Error(err),
-		)
+		t.logger.Error("failed to store request log", zap.Error(err))
 	}
 
 	return resp, nil
+}
+
+// gunzip decompresses a gzip-encoded payload.
+func gunzip(b []byte) ([]byte, error) {
+	zr, err := gzip.NewReader(bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	defer zr.Close()
+	return io.ReadAll(zr)
+}
+
+// truncate caps body to max bytes. Returns the (possibly cut) body and a flag
+// indicating whether truncation occurred.
+func truncate(body []byte, max int) ([]byte, bool) {
+	if max <= 0 || len(body) <= max {
+		return body, false
+	}
+	out := make([]byte, max)
+	copy(out, body[:max])
+	return out, true
+}
+
+// redactHeaders returns a copy of h with sensitive header values replaced by
+// [REDACTED]. The original header map is left untouched so the upstream still
+// receives the real values.
+func redactHeaders(h http.Header) http.Header {
+	if h == nil {
+		return nil
+	}
+	out := make(http.Header, len(h))
+	for k, vs := range h {
+		if _, sensitive := redactedHeaders[strings.ToLower(k)]; sensitive {
+			out[k] = []string{"[REDACTED]"}
+			continue
+		}
+		cp := make([]string, len(vs))
+		copy(cp, vs)
+		out[k] = cp
+	}
+	return out
 }

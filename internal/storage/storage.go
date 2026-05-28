@@ -3,46 +3,28 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"time"
-
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
-	_ "modernc.org/sqlite"
 )
 
-// Store is the database wrapper
-type SqlStore struct {
-	*sqlx.DB
+// Minimal interfaces to work with sqlx-backed databases.
+
+type QueryContext interface {
+	Exec(query string, params ...any) (sql.Result, error)
+	Query(query string, params ...any) (*sql.Rows, error)
 }
 
-var _ Database = &SqlStore{}
-
-func NewSqlStore(driver, dsn string) (*SqlStore, error) {
-	db, err := sqlx.Open(driver, dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	// Maximum Idle Connections
-	db.SetMaxIdleConns(20)
-	// Idle Connection Timeout
-	db.SetConnMaxIdleTime(1 * time.Second)
-	// Connection Lifetime
-	db.SetConnMaxLifetime(30 * time.Second)
-
-	return &SqlStore{db}, nil
+type Transaction interface {
+	Get(dest any, query string, args ...any) error
+	Select(dest any, query string, args ...any) error
+	QueryContext
 }
 
-func (st *SqlStore) BeginTx(ctx context.Context) (Transactioner, error) {
-	tx, err := st.DB.BeginTxx(ctx, &sql.TxOptions{
-		Isolation: sql.LevelSerializable,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "database: Store.BeginTx st.BeginTxx error")
-	}
-	return tx, nil
+type Transactioner interface {
+	Transaction
+	Commit() error
+	Rollback() error
 }
 
-//func (st *SqlStore) Exec(query string, params ...interface{}) (sql.Result, error) {
-//return st.Exec(query, params...)
-//}
+type Database interface {
+	BeginTx(context.Context) (Transactioner, error)
+	Transaction
+}

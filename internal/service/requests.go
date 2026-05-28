@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/mtavano/golden-gate/internal/models"
 	"github.com/mtavano/golden-gate/internal/storage"
@@ -45,5 +46,30 @@ func (rs *RequestSvc) GetRequestsWithPagination(limit, offset int) ([]*models.Re
 	return query.SelectRequestLogs(rs.db, &query.SelectRequestLogsQuery{
 		Limit:  limit,
 		Offset: offset,
+	})
+}
+
+// GetRequestsByService retrieves request logs filtered by service and optional time range.
+func (rs *RequestSvc) GetRequestsByService(serviceName string, from, to time.Time, limit, offset int) ([]*models.RequestLog, error) {
+	return query.SelectRequestLogs(rs.db, &query.SelectRequestLogsQuery{
+		ServiceName: serviceName,
+		From:        from,
+		To:          to,
+		Limit:       limit,
+		Offset:      offset,
+	})
+}
+
+// CountByService returns total count and last activity timestamp per service.
+func (rs *RequestSvc) CountByService() (map[string]query.ServiceStats, error) {
+	return query.CountByService(rs.db)
+}
+
+// CountRequestsByService returns the number of requests for a service within an optional range.
+func (rs *RequestSvc) CountRequestsByService(serviceName string, from, to time.Time) (int64, error) {
+	return query.CountRequestLogs(rs.db, &query.CountRequestLogsQuery{
+		ServiceName: serviceName,
+		From:        from,
+		To:          to,
 	})
 }

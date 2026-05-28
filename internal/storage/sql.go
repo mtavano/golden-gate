@@ -2,29 +2,52 @@ package storage
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
+	_ "modernc.org/sqlite"
 )
 
-// minimal interfaces to work with postgres/sqlx  properly
-
-type QueryContext interface {
-	Exec(query string, params ...any) (sql.Result, error)
-	Query(query string, params ...any) (*sql.Rows, error)
+// SqlStore is the database wrapper
+type SqlStore struct {
+	*sqlx.DB
 }
 
-type Transaction interface {
-	Get(dest any, query string, args ...any) error
-	Select(dest any, query string, args ...any) error
-	QueryContext
+var _ Database = &SqlStore{}
+
+func NewSqlStore(driver, dsn string) (*SqlStore, error) {
+	db, err := sqlx.Open(driver, dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	// SQLite supports a single writer; force a serial pool so PRAGMAs apply
+	// consistently and writers don't fight for the same file.
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+	db.SetConnMaxLifetime(0)
+
+	if driver == "sqlite" || driver == "sqlite3" {
+		pragmas := []string{
+			"PRAGMA journal_mode=WAL",
+			"PRAGMA busy_timeout=5000",
+			"PRAGMA synchronous=NORMAL",
+			"PRAGMA foreign_keys=ON",
+		}
+		for _, p := range pragmas {
+			if _, err := db.Exec(p); err != nil {
+				return nil, errors.Wrapf(err, "storage: failed to apply %q", p)
+			}
+		}
+	}
+
+	return &SqlStore{db}, nil
 }
 
-type Transactioner interface {
-	Transaction
-	Commit() error
-	Rollback() error
-}
-
-type Database interface {
-	BeginTx(context.Context) (Transactioner, error)
-	Transaction
+func (st *SqlStore) BeginTx(ctx context.Context) (Transactioner, error) {
+	tx, err := st.DB.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "storage: SqlStore.BeginTx error")
+	}
+	return tx, nil
 }

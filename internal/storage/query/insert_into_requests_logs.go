@@ -10,61 +10,67 @@ import (
 // InsertRequestLog inserts a RequestLog into the database using sql.Tx
 // It handles JSON serialization of headers and query_params, and BLOB storage for body and response_body
 func InsertRequestLog(tx storage.Transaction, req *models.RequestLog) error {
-	// Serialize headers to JSON
 	headersJSON, err := json.Marshal(req.Headers)
 	if err != nil {
 		return err
 	}
 
-	// Serialize query parameters to JSON
 	queryParamsJSON, err := json.Marshal(req.Query)
 	if err != nil {
 		return err
 	}
 
-	// Prepare the SQL statement
-	query := `
+	stmt := `
 		INSERT INTO request_logs (
-			method, 
-			url, 
-			timestamp, 
-			headers, 
-			query_params, 
-			body, 
-			response_status_code, 
-			response_body, 
-			response_headers, 
+			service_name,
+			method,
+			url,
+			timestamp,
+			headers,
+			query_params,
+			body,
+			request_body_truncated,
+			duration_ms,
+			response_status_code,
+			response_body,
+			response_body_truncated,
+			response_headers,
 			created_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	// Prepare response data
-	var responseStatusCode *int
-	var responseBody []byte
-	var responseHeadersJSON []byte
+	var (
+		responseStatusCode      *int
+		responseBody            []byte
+		responseBodyTruncated   bool
+		responseHeadersJSON     []byte
+	)
 
 	if req.Response != nil {
 		responseStatusCode = &req.Response.StatusCode
 		responseBody = req.Response.Body
+		responseBodyTruncated = req.Response.BodyTruncated
 
-		// Serialize response headers to JSON
 		responseHeadersJSON, err = json.Marshal(req.Response.Headers)
 		if err != nil {
 			return err
 		}
 	}
 
-	// Execute the insert
 	_, err = tx.Exec(
-		query,
+		stmt,
+		req.ServiceName,
 		req.Method,
 		req.URL,
 		req.Timestamp,
 		headersJSON,
 		queryParamsJSON,
 		req.Body,
+		req.BodyTruncated,
+		req.DurationMs,
 		responseStatusCode,
 		responseBody,
+		responseBodyTruncated,
 		responseHeadersJSON,
 		req.CreatedAt,
 	)
