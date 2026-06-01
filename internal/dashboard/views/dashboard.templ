@@ -10,16 +10,16 @@ templ Dashboard(cards []ServiceCard, loc *time.Location) {
 		<div class="space-y-8">
 			<header class="flex items-baseline justify-between">
 				<div class="flex items-baseline">
-					<h1 class="text-3xl font-bold text-gray-900">Golden Gate</h1>
-					<a href="/dashboard/config" class="text-sm text-gray-600 hover:text-gray-900 ml-4">⚙ Editar config</a>
+					<h1 class="text-3xl font-bold text-white">Golden Gate</h1>
+					<a href="/dashboard/config" class="text-sm text-gray-400 hover:text-gray-200 ml-4">⚙ Editar config</a>
 				</div>
-				<span class="text-sm text-gray-500">{ fmt.Sprintf("TZ: %s", loc.String()) }</span>
+				<span class="text-sm text-gray-400">{ fmt.Sprintf("TZ: %s", loc.String()) }</span>
 			</header>
 
 			<section class="space-y-4">
-				<h2 class="text-xl font-semibold text-gray-800">Servicios configurados</h2>
+				<h2 class="text-xl font-semibold text-gray-200">Servicios configurados</h2>
 				if len(cards) == 0 {
-					<p class="text-gray-500">No hay servicios configurados. Editá <code>configs/service.json</code> para agregar uno.</p>
+					<p class="text-gray-400">No hay servicios configurados. Editá <code class="bg-gray-800 px-1.5 py-0.5 rounded text-gray-300">configs/service.json</code> para agregar uno.</p>
 				} else {
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						for _, c := range cards {
@@ -33,25 +33,25 @@ templ Dashboard(cards []ServiceCard, loc *time.Location) {
 }
 
 templ serviceCard(c ServiceCard, loc *time.Location) {
-	<a href={ templ.URL("/dashboard/services/" + c.Name) } class="block bg-white shadow rounded-lg p-5 hover:shadow-md transition border border-transparent hover:border-blue-200">
+	<a href={ templ.URL("/dashboard/services/" + c.Name) } class="block bg-gray-800 shadow rounded-lg p-5 hover:shadow-lg hover:bg-gray-750 transition border border-gray-700 hover:border-blue-500">
 		<div class="flex items-start justify-between">
 			<div class="space-y-1">
 				<div class="flex items-center space-x-2">
-					<h3 class="text-lg font-semibold text-gray-900">{ c.Name }</h3>
+					<h3 class="text-lg font-semibold text-gray-100">{ c.Name }</h3>
 					if c.Orphan {
-						<span class="text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">huérfano</span>
+						<span class="text-xs px-2 py-0.5 rounded bg-yellow-900/50 text-yellow-300 border border-yellow-700">huérfano</span>
 					}
 				</div>
 				if c.BasePrefix != "" {
-					<p class="text-sm font-mono text-blue-700">{ c.BasePrefix }</p>
+					<p class="text-sm font-mono text-blue-400">{ c.BasePrefix }</p>
 				}
 				if c.Target != "" {
-					<p class="text-xs text-gray-500 break-all">→ { c.Target }</p>
+					<p class="text-xs text-gray-400 break-all">→ { c.Target }</p>
 				}
 			</div>
 			<div class="text-right">
-				<div class="text-2xl font-bold text-gray-900">{ fmt.Sprintf("%d", c.Count) }</div>
-				<div class="text-xs text-gray-500">requests</div>
+				<div class="text-2xl font-bold text-gray-100">{ fmt.Sprintf("%d", c.Count) }</div>
+				<div class="text-xs text-gray-400">requests</div>
 			</div>
 		</div>
 		<div class="mt-3 text-xs text-gray-500">

@@ -173,14 +173,14 @@ func escapeSingleQuotes(s string) string {
 func statusClass(code int) string {
 	switch {
 	case code == 0:
-		return "bg-gray-100 text-gray-700"
+		return "bg-gray-700 text-gray-300 border-gray-600"
 	case code >= 200 && code < 300:
-		return "bg-green-100 text-green-800"
+		return "bg-green-900/50 text-green-300 border-green-700"
 	case code >= 300 && code < 400:
-		return "bg-blue-100 text-blue-800"
+		return "bg-blue-900/50 text-blue-300 border-blue-700"
 	case code >= 400 && code < 500:
-		return "bg-yellow-100 text-yellow-800"
+		return "bg-yellow-900/50 text-yellow-300 border-yellow-700"
 	default:
-		return "bg-red-100 text-red-800"
+		return "bg-red-900/50 text-red-300 border-red-700"
 	}
 }

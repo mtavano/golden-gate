@@ -50,7 +50,7 @@ func Explore(v ExploreView) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-6\"><div class=\"flex items-center justify-between\"><a href=\"/dashboard\" class=\"text-sm text-blue-600 hover:underline\">← Volver al dashboard</a> <span class=\"text-xs text-gray-500\">TZ: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-6\"><div class=\"flex items-center justify-between\"><a href=\"/dashboard\" class=\"text-sm text-blue-400 hover:underline\">← Volver al dashboard</a> <span class=\"text-xs text-gray-400\">TZ: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -63,14 +63,14 @@ func Explore(v ExploreView) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></div><header class=\"bg-white shadow rounded-lg p-5\"><div class=\"flex items-baseline justify-between flex-wrap gap-2\"><div><h1 class=\"text-2xl font-bold text-gray-900\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></div><header class=\"bg-gray-800 shadow rounded-lg p-5 border border-gray-700\"><div class=\"flex items-baseline justify-between flex-wrap gap-2\"><div><h1 class=\"text-2xl font-bold text-white\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(v.ServiceName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 23, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 23, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -81,7 +81,7 @@ func Explore(v ExploreView) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if v.BasePrefix != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<p class=\"text-sm font-mono text-blue-700\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<p class=\"text-sm font-mono text-blue-400\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -100,7 +100,7 @@ func Explore(v ExploreView) templ.Component {
 				}
 			}
 			if v.Target != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"text-xs text-gray-500 break-all\">→ ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"text-xs text-gray-400 break-all\">→ ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -118,7 +118,7 @@ func Explore(v ExploreView) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div class=\"text-right\"><div class=\"text-3xl font-bold text-gray-900\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div class=\"text-right\"><div class=\"text-3xl font-bold text-gray-100\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -131,7 +131,7 @@ func Explore(v ExploreView) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"text-xs text-gray-500\">requests en rango</div></div></div></header><form method=\"get\" class=\"bg-white shadow rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end\"><label class=\"text-sm\"><span class=\"block text-gray-700 mb-1\">Desde</span> <input type=\"datetime-local\" name=\"from\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"text-xs text-gray-400\">requests en rango</div></div></div></header><form method=\"get\" class=\"bg-gray-800 shadow rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end border border-gray-700\"><label class=\"text-sm\"><span class=\"block text-gray-300 mb-1\">Desde</span> <input type=\"datetime-local\" name=\"from\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -144,7 +144,7 @@ func Explore(v ExploreView) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"w-full border rounded px-2 py-1\"></label> <label class=\"text-sm\"><span class=\"block text-gray-700 mb-1\">Hasta</span> <input type=\"datetime-local\" name=\"to\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"w-full bg-gray-900 border-gray-600 text-gray-200 rounded px-2 py-1 focus:border-blue-500 focus:ring-blue-500\"></label> <label class=\"text-sm\"><span class=\"block text-gray-300 mb-1\">Hasta</span> <input type=\"datetime-local\" name=\"to\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -157,12 +157,12 @@ func Explore(v ExploreView) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"w-full border rounded px-2 py-1\"></label><div><button type=\"submit\" class=\"w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded\">Filtrar</button></div></form><section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"w-full bg-gray-900 border-gray-600 text-gray-200 rounded px-2 py-1 focus:border-blue-500 focus:ring-blue-500\"></label><div><button type=\"submit\" class=\"w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded transition\">Filtrar</button></div></form><section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(v.Requests) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"bg-white shadow rounded-lg p-6 text-center text-gray-500\">No hay requests en el rango seleccionado.</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"bg-gray-800 shadow rounded-lg p-6 text-center text-gray-400 border border-gray-700\">No hay requests en el rango seleccionado.</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -205,7 +205,7 @@ func Explore(v ExploreView) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"text-sm text-blue-600 hover:underline\">← Anterior</a> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"text-sm text-blue-400 hover:underline\">← Anterior</a> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -215,7 +215,7 @@ func Explore(v ExploreView) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<span class=\"text-xs text-gray-500\">Página ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<span class=\"text-xs text-gray-400\">Página ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -246,7 +246,7 @@ func Explore(v ExploreView) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"text-sm text-blue-600 hover:underline\">Siguiente →</a>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"text-sm text-blue-400 hover:underline\">Siguiente →</a>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -309,14 +309,14 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"bg-white shadow rounded-lg p-5 space-y-4\"><div class=\"flex items-center justify-between border-b pb-3\"><div class=\"space-y-1\"><div class=\"flex items-center space-x-2 flex-wrap\"><span class=\"px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"bg-gray-800 shadow rounded-lg p-5 space-y-4 border border-gray-700\"><div class=\"flex items-center justify-between border-b border-gray-700 pb-3\"><div class=\"space-y-1\"><div class=\"flex items-center space-x-2 flex-wrap\"><span class=\"px-2 py-1 bg-blue-900/50 text-blue-300 rounded text-sm font-medium border border-blue-800\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(req.Method)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 92, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 92, Col: 121}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -327,7 +327,7 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if req.Response != nil {
-			var templ_7745c5c3_Var16 = []any{"px-2 py-1 rounded text-sm font-medium", statusClass(req.Response.StatusCode)}
+			var templ_7745c5c3_Var16 = []any{"px-2 py-1 rounded text-sm font-medium border", statusClass(req.Response.StatusCode)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var16...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -363,7 +363,7 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<span class=\"font-mono text-gray-700 text-sm break-all\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<span class=\"font-mono text-gray-300 text-sm break-all\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -376,7 +376,7 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</span></div><div class=\"text-xs text-gray-500 space-x-3\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</span></div><div class=\"text-xs text-gray-400 space-x-3\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -412,19 +412,19 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div></div><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-6\"><div class=\"space-y-3\"><h3 class=\"text-sm font-semibold text-gray-900 uppercase tracking-wide\">Request</h3>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div></div><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-6\"><div class=\"space-y-3\"><h3 class=\"text-sm font-semibold text-gray-200 uppercase tracking-wide\">Request</h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(req.Headers) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<details class=\"bg-gray-50 rounded\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-700\">Headers</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<details class=\"bg-gray-900 rounded border border-gray-700\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-300\">Headers</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all text-gray-300\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(formatHeaders(req.Headers))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 116, Col: 122}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 116, Col: 136}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -436,14 +436,14 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 			}
 		}
 		if len(req.Query) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<details class=\"bg-gray-50 rounded\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-700\">Query params</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<details class=\"bg-gray-900 rounded border border-gray-700\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-300\">Query params</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all text-gray-300\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(formatQueryParams(req.Query))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 123, Col: 124}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 123, Col: 138}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -455,14 +455,14 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 			}
 		}
 		if len(req.Body) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<details open class=\"bg-gray-50 rounded\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-700\">Body</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<details open class=\"bg-gray-900 rounded border border-gray-700\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-300\">Body</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(formatBodySmart(req.Body, contentTypeOf(req.Headers), req.BodyTruncated))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 130, Col: 168}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 130, Col: 182}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -473,20 +473,20 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</div><div class=\"space-y-3\"><h3 class=\"text-sm font-semibold text-gray-900 uppercase tracking-wide\">Response</h3>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</div><div class=\"space-y-3\"><h3 class=\"text-sm font-semibold text-gray-200 uppercase tracking-wide\">Response</h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if req.Response != nil {
 			if len(req.Response.Headers) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<details class=\"bg-gray-50 rounded\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-700\">Headers</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<details class=\"bg-gray-900 rounded border border-gray-700\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-300\">Headers</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all text-gray-300\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(formatHeaders(req.Response.Headers))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 141, Col: 132}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 141, Col: 146}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -502,14 +502,14 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if len(req.Response.Body) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<details open class=\"bg-gray-50 rounded\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-700\">Body</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<details open class=\"bg-gray-900 rounded border border-gray-700\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-300\">Body</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(formatBodySmart(req.Response.Body, contentTypeOf(req.Response.Headers), req.Response.BodyTruncated))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 147, Col: 196}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 147, Col: 210}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -526,14 +526,14 @@ func requestDetail(req *models.RequestLog, loc *time.Location) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "</div></div><details class=\"bg-gray-50 rounded\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-700\">curl</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-48 whitespace-pre-wrap break-all\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "</div></div><details class=\"bg-gray-900 rounded border border-gray-700\"><summary class=\"cursor-pointer px-3 py-2 text-sm text-gray-300\">curl</summary><pre class=\"text-xs font-mono p-3 overflow-auto max-h-48 whitespace-pre-wrap break-all text-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(buildCurlCommand(req))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 158, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/explore.templ`, Line: 158, Col: 128}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
