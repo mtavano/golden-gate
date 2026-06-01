@@ -13,39 +13,39 @@ templ Explore(v ExploreView) {
 	@Layout("Golden Gate — " + v.ServiceName) {
 		<div class="space-y-6">
 			<div class="flex items-center justify-between">
-				<a href="/dashboard" class="text-sm text-blue-600 hover:underline">← Volver al dashboard</a>
-				<span class="text-xs text-gray-500">TZ: { v.Location.String() }</span>
+				<a href="/dashboard" class="text-sm text-blue-400 hover:underline">← Volver al dashboard</a>
+				<span class="text-xs text-gray-400">TZ: { v.Location.String() }</span>
 			</div>
 
-			<header class="bg-white shadow rounded-lg p-5">
+			<header class="bg-gray-800 shadow rounded-lg p-5 border border-gray-700">
 				<div class="flex items-baseline justify-between flex-wrap gap-2">
 					<div>
-						<h1 class="text-2xl font-bold text-gray-900">{ v.ServiceName }</h1>
+						<h1 class="text-2xl font-bold text-white">{ v.ServiceName }</h1>
 						if v.BasePrefix != "" {
-							<p class="text-sm font-mono text-blue-700">{ v.BasePrefix }</p>
+							<p class="text-sm font-mono text-blue-400">{ v.BasePrefix }</p>
 						}
 						if v.Target != "" {
-							<p class="text-xs text-gray-500 break-all">→ { v.Target }</p>
+							<p class="text-xs text-gray-400 break-all">→ { v.Target }</p>
 						}
 					</div>
 					<div class="text-right">
-						<div class="text-3xl font-bold text-gray-900">{ fmt.Sprintf("%d", v.Count) }</div>
-						<div class="text-xs text-gray-500">requests en rango</div>
+						<div class="text-3xl font-bold text-gray-100">{ fmt.Sprintf("%d", v.Count) }</div>
+						<div class="text-xs text-gray-400">requests en rango</div>
 					</div>
 				</div>
 			</header>
 
-			<form method="get" class="bg-white shadow rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+			<form method="get" class="bg-gray-800 shadow rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end border border-gray-700">
 				<label class="text-sm">
-					<span class="block text-gray-700 mb-1">Desde</span>
-					<input type="datetime-local" name="from" value={ formatLocalInput(v.From, v.Location) } class="w-full border rounded px-2 py-1"/>
+					<span class="block text-gray-300 mb-1">Desde</span>
+					<input type="datetime-local" name="from" value={ formatLocalInput(v.From, v.Location) } class="w-full bg-gray-900 border-gray-600 text-gray-200 rounded px-2 py-1 focus:border-blue-500 focus:ring-blue-500"/>
 				</label>
 				<label class="text-sm">
-					<span class="block text-gray-700 mb-1">Hasta</span>
-					<input type="datetime-local" name="to" value={ formatLocalInput(v.To, v.Location) } class="w-full border rounded px-2 py-1"/>
+					<span class="block text-gray-300 mb-1">Hasta</span>
+					<input type="datetime-local" name="to" value={ formatLocalInput(v.To, v.Location) } class="w-full bg-gray-900 border-gray-600 text-gray-200 rounded px-2 py-1 focus:border-blue-500 focus:ring-blue-500"/>
 				</label>
 				<div>
-					<button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">
+					<button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded transition">
 						Filtrar
 					</button>
 				</div>
@@ -53,7 +53,7 @@ templ Explore(v ExploreView) {
 
 			<section>
 				if len(v.Requests) == 0 {
-					<div class="bg-white shadow rounded-lg p-6 text-center text-gray-500">
+					<div class="bg-gray-800 shadow rounded-lg p-6 text-center text-gray-400 border border-gray-700">
 						No hay requests en el rango seleccionado.
 					</div>
 				} else {
@@ -68,13 +68,13 @@ templ Explore(v ExploreView) {
 			if v.HasNext || v.Page > 1 {
 				<nav class="flex items-center justify-between">
 					if v.Page > 1 {
-						<a href={ templ.URL(pageLink(v, v.Page-1)) } class="text-sm text-blue-600 hover:underline">← Anterior</a>
+						<a href={ templ.URL(pageLink(v, v.Page-1)) } class="text-sm text-blue-400 hover:underline">← Anterior</a>
 					} else {
 						<span></span>
 					}
-					<span class="text-xs text-gray-500">Página { fmt.Sprintf("%d", v.Page) }</span>
+					<span class="text-xs text-gray-400">Página { fmt.Sprintf("%d", v.Page) }</span>
 					if v.HasNext {
-						<a href={ templ.URL(pageLink(v, v.Page+1)) } class="text-sm text-blue-600 hover:underline">Siguiente →</a>
+						<a href={ templ.URL(pageLink(v, v.Page+1)) } class="text-sm text-blue-400 hover:underline">Siguiente →</a>
 					} else {
 						<span></span>
 					}
@@ -85,19 +85,19 @@ templ Explore(v ExploreView) {
 }
 
 templ requestDetail(req *models.RequestLog, loc *time.Location) {
-	<div id={ "request-" + fmt.Sprintf("%d", req.ID) } class="bg-white shadow rounded-lg p-5 space-y-4">
-		<div class="flex items-center justify-between border-b pb-3">
+	<div id={ "request-" + fmt.Sprintf("%d", req.ID) } class="bg-gray-800 shadow rounded-lg p-5 space-y-4 border border-gray-700">
+		<div class="flex items-center justify-between border-b border-gray-700 pb-3">
 			<div class="space-y-1">
 				<div class="flex items-center space-x-2 flex-wrap">
-					<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">{ req.Method }</span>
+					<span class="px-2 py-1 bg-blue-900/50 text-blue-300 rounded text-sm font-medium border border-blue-800">{ req.Method }</span>
 					if req.Response != nil {
-						<span class={ "px-2 py-1 rounded text-sm font-medium", statusClass(req.Response.StatusCode) }>
+						<span class={ "px-2 py-1 rounded text-sm font-medium border", statusClass(req.Response.StatusCode) }>
 							{ fmt.Sprintf("%d", req.Response.StatusCode) }
 						</span>
 					}
-					<span class="font-mono text-gray-700 text-sm break-all">{ req.URL }</span>
+					<span class="font-mono text-gray-300 text-sm break-all">{ req.URL }</span>
 				</div>
-				<div class="text-xs text-gray-500 space-x-3">
+				<div class="text-xs text-gray-400 space-x-3">
 					<span>{ formatTime(req.Timestamp, loc) }</span>
 					if req.DurationMs > 0 {
 						<span>{ fmt.Sprintf("%d ms", req.DurationMs) }</span>
@@ -108,43 +108,43 @@ templ requestDetail(req *models.RequestLog, loc *time.Location) {
 
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<div class="space-y-3">
-				<h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide">Request</h3>
+				<h3 class="text-sm font-semibold text-gray-200 uppercase tracking-wide">Request</h3>
 
 				if len(req.Headers) > 0 {
-					<details class="bg-gray-50 rounded">
-						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-700">Headers</summary>
-						<pre class="text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all">{ formatHeaders(req.Headers) }</pre>
+					<details class="bg-gray-900 rounded border border-gray-700">
+						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Headers</summary>
+						<pre class="text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all text-gray-300">{ formatHeaders(req.Headers) }</pre>
 					</details>
 				}
 
 				if len(req.Query) > 0 {
-					<details class="bg-gray-50 rounded">
-						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-700">Query params</summary>
-						<pre class="text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all">{ formatQueryParams(req.Query) }</pre>
+					<details class="bg-gray-900 rounded border border-gray-700">
+						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Query params</summary>
+						<pre class="text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all text-gray-300">{ formatQueryParams(req.Query) }</pre>
 					</details>
 				}
 
 				if len(req.Body) > 0 {
-					<details open class="bg-gray-50 rounded">
-						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-700">Body</summary>
-						<pre class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all">{ formatBodySmart(req.Body, contentTypeOf(req.Headers), req.BodyTruncated) }</pre>
+					<details open class="bg-gray-900 rounded border border-gray-700">
+						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Body</summary>
+						<pre class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300">{ formatBodySmart(req.Body, contentTypeOf(req.Headers), req.BodyTruncated) }</pre>
 					</details>
 				}
 			</div>
 
 			<div class="space-y-3">
-				<h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide">Response</h3>
+				<h3 class="text-sm font-semibold text-gray-200 uppercase tracking-wide">Response</h3>
 				if req.Response != nil {
 					if len(req.Response.Headers) > 0 {
-						<details class="bg-gray-50 rounded">
-							<summary class="cursor-pointer px-3 py-2 text-sm text-gray-700">Headers</summary>
-							<pre class="text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all">{ formatHeaders(req.Response.Headers) }</pre>
+						<details class="bg-gray-900 rounded border border-gray-700">
+							<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Headers</summary>
+							<pre class="text-xs font-mono p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all text-gray-300">{ formatHeaders(req.Response.Headers) }</pre>
 						</details>
 					}
 					if len(req.Response.Body) > 0 {
-						<details open class="bg-gray-50 rounded">
-							<summary class="cursor-pointer px-3 py-2 text-sm text-gray-700">Body</summary>
-							<pre class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all">{ formatBodySmart(req.Response.Body, contentTypeOf(req.Response.Headers), req.Response.BodyTruncated) }</pre>
+						<details open class="bg-gray-900 rounded border border-gray-700">
+							<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Body</summary>
+							<pre class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300">{ formatBodySmart(req.Response.Body, contentTypeOf(req.Response.Headers), req.Response.BodyTruncated) }</pre>
 						</details>
 					}
 				} else {
@@ -153,9 +153,9 @@ templ requestDetail(req *models.RequestLog, loc *time.Location) {
 			</div>
 		</div>
 
-		<details class="bg-gray-50 rounded">
-			<summary class="cursor-pointer px-3 py-2 text-sm text-gray-700">curl</summary>
-			<pre class="text-xs font-mono p-3 overflow-auto max-h-48 whitespace-pre-wrap break-all">{ buildCurlCommand(req) }</pre>
+		<details class="bg-gray-900 rounded border border-gray-700">
+			<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">curl</summary>
+			<pre class="text-xs font-mono p-3 overflow-auto max-h-48 whitespace-pre-wrap break-all text-gray-300">{ buildCurlCommand(req) }</pre>
 		</details>
 	</div>
 }

@@ -43,20 +43,20 @@ func Editor(v EditorView) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-6\"><div class=\"flex items-center justify-between\"><a href=\"/dashboard\" class=\"text-sm text-blue-600 hover:underline\">← Volver al dashboard</a><h1 class=\"text-2xl font-bold text-gray-900\">Editar service.json</h1></div><div class=\"bg-white shadow rounded-lg p-4 text-sm text-gray-700 space-y-1\"><div><span class=\"font-semibold\">Archivo:</span> <span class=\"font-mono break-all\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-6\"><div class=\"flex items-center justify-between\"><a href=\"/dashboard\" class=\"text-sm text-blue-400 hover:underline\">← Volver al dashboard</a><h1 class=\"text-2xl font-bold text-white\">Editar service.json</h1></div><div class=\"bg-gray-800 shadow rounded-lg p-4 text-sm text-gray-300 space-y-1 border border-gray-700\"><div><span class=\"font-semibold text-gray-200\">Archivo:</span> <span class=\"font-mono break-all text-gray-400\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(v.Path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/editor.templ`, Line: 16, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/editor.templ`, Line: 16, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></div><div><span class=\"font-semibold\">Servicios activos:</span> <span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></div><div><span class=\"font-semibold text-gray-200\">Servicios activos:</span> <span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -74,13 +74,13 @@ func Editor(v EditorView) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if v.Success {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"bg-green-50 border border-green-200 text-green-800 p-3 rounded\">Configuración guardada. Hot reload aplicado.</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"bg-green-900/40 border border-green-700 text-green-300 p-3 rounded\">Configuración guardada. Hot reload aplicado.</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if v.Error != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"bg-red-50 border border-red-200 text-red-800 p-3 rounded whitespace-pre-wrap break-all\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"bg-red-900/40 border border-red-700 text-red-300 p-3 rounded whitespace-pre-wrap break-all\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -98,20 +98,20 @@ func Editor(v EditorView) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form method=\"POST\" action=\"/dashboard/config\" class=\"space-y-4\"><textarea name=\"content\" rows=\"24\" spellcheck=\"false\" class=\"w-full font-mono text-sm p-3 border rounded\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form method=\"POST\" action=\"/dashboard/config\" class=\"space-y-4\"><textarea name=\"content\" rows=\"24\" spellcheck=\"false\" class=\"w-full font-mono text-sm p-3 bg-gray-900 border border-gray-600 text-gray-200 rounded focus:border-blue-500 focus:ring-blue-500\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(v.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/editor.templ`, Line: 37, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dashboard/views/editor.templ`, Line: 37, Col: 205}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</textarea><div><button type=\"submit\" class=\"bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700\">Guardar y aplicar</button></div></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</textarea><div><button type=\"submit\" class=\"bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 transition\">Guardar y aplicar</button></div></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

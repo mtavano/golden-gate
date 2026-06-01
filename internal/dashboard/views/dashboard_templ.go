@@ -46,7 +46,7 @@ func Dashboard(cards []ServiceCard, loc *time.Location) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-8\"><header class=\"flex items-baseline justify-between\"><div class=\"flex items-baseline\"><h1 class=\"text-3xl font-bold text-gray-900\">Golden Gate</h1><a href=\"/dashboard/config\" class=\"text-sm text-gray-600 hover:text-gray-900 ml-4\">⚙ Editar config</a></div><span class=\"text-sm text-gray-500\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-8\"><header class=\"flex items-baseline justify-between\"><div class=\"flex items-baseline\"><h1 class=\"text-3xl font-bold text-white\">Golden Gate</h1><a href=\"/dashboard/config\" class=\"text-sm text-gray-400 hover:text-gray-200 ml-4\">⚙ Editar config</a></div><span class=\"text-sm text-gray-400\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -59,12 +59,12 @@ func Dashboard(cards []ServiceCard, loc *time.Location) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></header><section class=\"space-y-4\"><h2 class=\"text-xl font-semibold text-gray-800\">Servicios configurados</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></header><section class=\"space-y-4\"><h2 class=\"text-xl font-semibold text-gray-200\">Servicios configurados</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(cards) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<p class=\"text-gray-500\">No hay servicios configurados. Editá <code>configs/service.json</code> para agregar uno.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<p class=\"text-gray-400\">No hay servicios configurados. Editá <code class=\"bg-gray-800 px-1.5 py-0.5 rounded text-gray-300\">configs/service.json</code> para agregar uno.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -132,7 +132,7 @@ func serviceCard(c ServiceCard, loc *time.Location) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"block bg-white shadow rounded-lg p-5 hover:shadow-md transition border border-transparent hover:border-blue-200\"><div class=\"flex items-start justify-between\"><div class=\"space-y-1\"><div class=\"flex items-center space-x-2\"><h3 class=\"text-lg font-semibold text-gray-900\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"block bg-gray-800 shadow rounded-lg p-5 hover:shadow-lg hover:bg-gray-750 transition border border-gray-700 hover:border-blue-500\"><div class=\"flex items-start justify-between\"><div class=\"space-y-1\"><div class=\"flex items-center space-x-2\"><h3 class=\"text-lg font-semibold text-gray-100\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,7 +150,7 @@ func serviceCard(c ServiceCard, loc *time.Location) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if c.Orphan {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<span class=\"text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800\">huérfano</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<span class=\"text-xs px-2 py-0.5 rounded bg-yellow-900/50 text-yellow-300 border border-yellow-700\">huérfano</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -160,7 +160,7 @@ func serviceCard(c ServiceCard, loc *time.Location) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if c.BasePrefix != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<p class=\"text-sm font-mono text-blue-700\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<p class=\"text-sm font-mono text-blue-400\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -179,7 +179,7 @@ func serviceCard(c ServiceCard, loc *time.Location) templ.Component {
 			}
 		}
 		if c.Target != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<p class=\"text-xs text-gray-500 break-all\">→ ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<p class=\"text-xs text-gray-400 break-all\">→ ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -197,7 +197,7 @@ func serviceCard(c ServiceCard, loc *time.Location) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"text-right\"><div class=\"text-2xl font-bold text-gray-900\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"text-right\"><div class=\"text-2xl font-bold text-gray-100\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -210,7 +210,7 @@ func serviceCard(c ServiceCard, loc *time.Location) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div><div class=\"text-xs text-gray-500\">requests</div></div></div><div class=\"mt-3 text-xs text-gray-500\">Último: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div><div class=\"text-xs text-gray-400\">requests</div></div></div><div class=\"mt-3 text-xs text-gray-500\">Último: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
