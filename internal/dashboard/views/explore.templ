@@ -127,7 +127,7 @@ templ requestDetail(req *models.RequestLog, loc *time.Location) {
 				if len(req.Body) > 0 {
 					<details open class="bg-gray-900 rounded border border-gray-700">
 						<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Body</summary>
-						<pre class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300">{ formatBodySmart(req.Body, contentTypeOf(req.Headers), req.BodyTruncated) }</pre>
+						<pre data-content-type={ contentTypeOf(req.Headers) } class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300"><code>{ formatBodySmart(req.Body, contentTypeOf(req.Headers), req.BodyTruncated) }</code></pre>
 					</details>
 				}
 			</div>
@@ -144,7 +144,7 @@ templ requestDetail(req *models.RequestLog, loc *time.Location) {
 					if len(req.Response.Body) > 0 {
 						<details open class="bg-gray-900 rounded border border-gray-700">
 							<summary class="cursor-pointer px-3 py-2 text-sm text-gray-300">Body</summary>
-							<pre class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300">{ formatBodySmart(req.Response.Body, contentTypeOf(req.Response.Headers), req.Response.BodyTruncated) }</pre>
+							<pre data-content-type={ contentTypeOf(req.Response.Headers) } class="text-xs font-mono p-3 overflow-auto max-h-96 whitespace-pre-wrap break-all text-gray-300"><code>{ formatBodySmart(req.Response.Body, contentTypeOf(req.Response.Headers), req.Response.BodyTruncated) }</code></pre>
 						</details>
 					}
 				} else {

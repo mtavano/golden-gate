@@ -42,7 +42,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-gray-950 text-gray-200 min-h-screen\"><div class=\"container mx-auto px-4 py-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css\"><script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js\"></script></head><body class=\"bg-gray-950 text-gray-200 min-h-screen\"><div class=\"container mx-auto px-4 py-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><script>\n\t\t\t\t(function() {\n\t\t\t\t\tfunction isJSON(text) {\n\t\t\t\t\t\tvar t = text.trim();\n\t\t\t\t\t\tif (!t.startsWith('{') && !t.startsWith('[')) return false;\n\t\t\t\t\t\ttry { JSON.parse(t); return true; } catch(e) { return false; }\n\t\t\t\t\t}\n\n\t\t\t\t\tfunction highlightCode() {\n\t\t\t\t\t\tdocument.querySelectorAll('pre[data-content-type]').forEach(function(pre) {\n\t\t\t\t\t\t\tvar ct = pre.getAttribute('data-content-type') || '';\n\t\t\t\t\t\t\tvar code = pre.querySelector('code');\n\t\t\t\t\t\t\tif (!code) return;\n\n\t\t\t\t\t\t\tif (ct.includes('json')) {\n\t\t\t\t\t\t\t\tcode.className = 'language-json';\n\t\t\t\t\t\t\t} else if (ct.includes('html') || ct.includes('xml')) {\n\t\t\t\t\t\t\t\tcode.className = 'language-xml';\n\t\t\t\t\t\t\t} else if (isJSON(code.textContent)) {\n\t\t\t\t\t\t\t\tcode.className = 'language-json';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\thljs.highlightAll();\n\t\t\t\t\t}\n\n\t\t\t\t\thighlightCode();\n\t\t\t\t\tdocument.body.addEventListener('htmx:afterSettle', highlightCode);\n\t\t\t\t})();\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

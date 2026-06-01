@@ -9,11 +9,42 @@ templ Layout(title string) {
 			<title>{ title }</title>
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<script src="https://cdn.tailwindcss.com"></script>
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css"/>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
 		</head>
 		<body class="bg-gray-950 text-gray-200 min-h-screen">
 			<div class="container mx-auto px-4 py-8">
 				{ children... }
 			</div>
+			<script>
+				(function() {
+					function isJSON(text) {
+						var t = text.trim();
+						if (!t.startsWith('{') && !t.startsWith('[')) return false;
+						try { JSON.parse(t); return true; } catch(e) { return false; }
+					}
+
+					function highlightCode() {
+						document.querySelectorAll('pre[data-content-type]').forEach(function(pre) {
+							var ct = pre.getAttribute('data-content-type') || '';
+							var code = pre.querySelector('code');
+							if (!code) return;
+
+							if (ct.includes('json')) {
+								code.className = 'language-json';
+							} else if (ct.includes('html') || ct.includes('xml')) {
+								code.className = 'language-xml';
+							} else if (isJSON(code.textContent)) {
+								code.className = 'language-json';
+							}
+						});
+						hljs.highlightAll();
+					}
+
+					highlightCode();
+					document.body.addEventListener('htmx:afterSettle', highlightCode);
+				})();
+			</script>
 		</body>
 	</html>
-} 
+}
